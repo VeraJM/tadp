@@ -20,7 +20,6 @@ class Object
     Proc.new {self < valor}
   end
 
-
   def uno_de_estos(*extras)
     if extras.length == 1
       Proc.new {extras[0].any? do |elem|

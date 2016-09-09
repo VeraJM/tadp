@@ -1,6 +1,7 @@
 require 'rspec'
-require_relative '../src/Testing'
-
+require_relative '../src/Tester'
+require_relative '../src/Verificador'
+require_relative '../src/Persona'
 describe 'TADsPec tests' do
 
   verificador = Verificador.new
