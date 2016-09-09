@@ -103,6 +103,43 @@ describe 'test_deberia' do
   end
 
   it 'Leandro no deberia ser viejo' do
-  expect {leandro.deberia ser_joven}.to raise_error(NoMethodError)
+  expect{leandro.deberia ser_joven}.to raise_error(NoMethodError)
   end
+
+  it 'Leandro deberia tener_edad 22' do
+    expect(leandro.deberia tener_edad 22).to eq true
+  end
+
+  it 'Leandro deberia tener_edad 22' do
+    expect(leandro.deberia tener_nombre "leandro").to eq false
+  end
+
+  it 'Leandro deberia tener nombre nil' do
+    expect(leandro.deberia tener_nombre nil).to eq true
+  end
+
+  it 'Leandro deberia tener edad  mayor a 20' do
+    expect(leandro.deberia tener_edad mayor_a 20).to eq true
+  end
+
+  it 'Leandro deberia tener edad  menor a 25' do
+    expect(leandro.deberia tener_edad menor_a 25).to eq true
+  end
+
+  it 'Leandro deberia tener edad  uno de estos' do
+    expect(leandro.deberia tener_edad uno_de_estos [7,22,"hola"]).to eq true
+  end
+
+  it 'Leandro deberia entender :viejo?' do
+    expect(leandro.deberia entender :viejo?).to eq true
+  end
+
+  it 'Leandro deberia entender :class' do
+    expect(leandro.deberia entender :class).to eq true
+  end
+
+  it 'Leandro no deberia entender :nombre' do
+    expect(leandro.deberia entender :nombre).to eq false
+  end
+
 end

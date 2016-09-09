@@ -12,6 +12,10 @@ module FuncionesComparativas
     end
   end
 
+  def entender metodo
+   Proc.new {self.respond_to?(metodo)}
+  end
+
   def mayor_que valor
     Proc.new {self > valor}
   end
@@ -33,10 +37,22 @@ module FuncionesComparativas
     Proc.new {valores.member?(self)}
   end
 
+  def comienza_con palabra,prefijo
+    palabra.to_s.start_with?(prefijo)
+  end
+
+  def respond_to?(metodo,*)
+    comienza_con(metodo,"ser_") || comienza_con(metodo,"tener_") || super
+  end
+
   def method_missing(sym_metodo,*args,&block)
-    if sym_metodo.to_s.start_with?("ser_")
+    if comienza_con(sym_metodo,"ser_")
       consulta = sym_metodo.to_s[4,sym_metodo.to_s.length-4] + "?"
       Proc.new {self.send(consulta)}
+    elsif comienza_con(sym_metodo,"tener_")
+       variable = sym_metodo.to_s[6,sym_metodo.to_s.length-6]
+      Proc.new {
+          self.instance_variable_get("@"+variable).deberia ser args[0]}
     else
       super
     end
