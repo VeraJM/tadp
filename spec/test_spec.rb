@@ -4,7 +4,7 @@ require_relative '../src/Verificador'
 require_relative '../src/Persona'
 describe 'TADsPec tests' do
 
-  verificador = Verificador.new
+  verificador = TADsPec.new
   #TEST CON DEBERIA
   it 'cualquier objeto entiende :deberia' do
     expect(Object.respond_to? (:deberia)).to be(true)
@@ -31,7 +31,7 @@ describe 'TADsPec tests' do
     expect(leandro.deberia tener_edad 22).to be(true)
   end
 
-  it 'falla el test_tener' do
+  it 'falla el test tener_' do
     leandro = Persona.new 20
     expect(leandro.deberia tener_edad 22).to be(false)
   end
