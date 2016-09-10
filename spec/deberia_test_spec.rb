@@ -1,6 +1,7 @@
 require 'rspec'
 require_relative '../src/prueba.rb'
 require_relative '../src/mocks.rb'
+require_relative '../src/tadspec.rb'
 describe 'test_deberia' do
 
   let(:nico){
@@ -180,6 +181,25 @@ describe 'test_deberia' do
 
   it '{7/0} deberia explotar con NoMethodError' do
     expect(division_cero.deberia explotar_con NoMethodError).to eq false
+  end
+
+end
+
+describe 'test_suites' do
+
+  let(:tadspec) do
+    TADsPec.new
+  end
+  it 'Test sobre todos los suites' do
+    expect(TADsPec.testear).to eq true
+  end
+
+  it 'Test sobre la suite MiSuite' do
+    expect(TADsPec.testear MiSuite).to eq false
+  end
+
+  it 'Test sobre misuite y el test testear_que_tenga_nombre' do
+    expect(TADsPec.testear MiSuite ,:testear_que_tenga_nombre).to eq false
   end
 
 end

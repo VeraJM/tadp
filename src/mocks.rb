@@ -26,3 +26,17 @@ class Persona
     self.edad > 29
   end
 end
+
+# Esto es un test
+class MiSuiteDeTests
+  # Esto es un test
+  def testear_que_las_personas_de_mas_de_29_son_viejas
+    persona = Persona.new(30)
+    persona.deberia ser_viejo
+  end
+  # Esto no
+  def las_personas_de_mas_de_29_son_viejas
+    persona = Persona.new(30)
+    persona . deberia ser_viejo
+  end
+end
