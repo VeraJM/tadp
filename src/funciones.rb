@@ -41,10 +41,6 @@ module FuncionesComparativas
     palabra.to_s.start_with?(prefijo)
   end
 
-  def respond_to?(metodo,*)
-    comienza_con(metodo,"ser_") || comienza_con(metodo,"tener_") || super
-  end
-
   def method_missing(sym_metodo,*args,&block)
     if comienza_con(sym_metodo,"ser_")
       consulta = sym_metodo.to_s[4,sym_metodo.to_s.length-4] + "?"
