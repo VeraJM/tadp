@@ -23,6 +23,26 @@ describe 'test_deberia' do
     Persona.new 22
   }
 
+  let(:division_cero){
+    Proc.new {7/0}
+  }
+
+  let(:division_cero){
+    Proc.new {7/0}
+  }
+
+  let(:leandro_nombre){
+    Proc.new {leandro.nombre}
+  }
+
+  let(:leandro_viejo){
+    Proc.new {leandro.viejo?}
+  }
+
+  let(:division_cero){
+    Proc.new {7/0}
+  }
+
   it 'deberia ser igual a 1' do
     expect(1.deberia ser 1).to eq true
   end
@@ -140,6 +160,26 @@ describe 'test_deberia' do
 
   it 'Leandro no deberia entender :nombre' do
     expect(leandro.deberia entender :nombre).to eq false
+  end
+
+  it '7 /0 deberia explotar con zeroDivisionError' do
+    expect(division_cero.deberia explotar_con ZeroDivisionError).to eq true
+  end
+
+  it 'leandro.nombre deberia explotar con NoMethodError' do
+    expect(leandro_nombre.deberia explotar_con NoMethodError).to eq true
+  end
+
+  it 'leandro.nombre deberia explotar con Error' do
+    expect(leandro_nombre.deberia explotar_con StandardError).to eq true
+  end
+
+  it 'leandro.viejo? deberia explotar con NoMethodError' do
+    expect(leandro_viejo.deberia explotar_con NoMethodError).to eq false
+  end
+
+  it '{7/0} deberia explotar con NoMethodError' do
+    expect(division_cero.deberia explotar_con NoMethodError).to eq false
   end
 
 end

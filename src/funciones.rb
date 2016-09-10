@@ -1,7 +1,7 @@
 module FuncionesComparativas
 
-  def deberia proc
-    self.instance_eval &proc
+  def deberia configuracion
+      self.instance_eval &configuracion
   end
 
   def ser parametro
@@ -10,6 +10,16 @@ module FuncionesComparativas
     else
       Proc.new {self.equal? parametro}
     end
+  end
+
+  def explotar_con error
+    Proc.new{begin
+    self.call
+    rescue => excepcion
+               excepcion.class.ancestors.member? (error)
+    end
+    }
+
   end
 
   def entender metodo
@@ -39,10 +49,6 @@ module FuncionesComparativas
 
   def comienza_con palabra,prefijo
     palabra.to_s.start_with?(prefijo)
-  end
-
-  def respond_to?(metodo,*)
-    comienza_con(metodo,"ser_") || comienza_con(metodo,"tener_") || super
   end
 
   def method_missing(sym_metodo,*args,&block)
