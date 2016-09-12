@@ -1,6 +1,7 @@
 require 'set'
 
-require_relative '../src/mixines'
+require_relative 'Parser'
+require_relative 'Condiciones'
 
 #----------------------------------------------------------------------------------------#
 # Motor es el encargado de cargar las clases de los test
@@ -62,9 +63,9 @@ class Motor
     @lista_test = Set.new
 
     @@lista_test_suites.each { |suite|
-     (obtener_metodos_de_test suite).each{ |test|
-       @lista_test.add test
-     }
+      (obtener_metodos_de_test suite).each{ |test|
+        @lista_test.add test
+      }
     }
 
     @lista_test
@@ -104,23 +105,23 @@ class Motor
   def enseniar_deberia_a_Object
     unless Object.instance_methods.include? :deberia
       Object.send(:define_method, :deberia, proc {|objeto_a_comparar|
-          begin
-            if objeto_a_comparar.equal?(self)
-              resultado = ResultadoPaso.new
-            else
-              resultado = ResultadoFallo.new
-              resultado.resultado_esperado = objeto_a_comparar.obtener_objeto
-              resultado.resultado_obtenido = self
+        begin
+          if objeto_a_comparar.equal?(self)
+            resultado = ResultadoPaso.new
+          else
+            resultado = ResultadoFallo.new
+            resultado.resultado_esperado = objeto_a_comparar.obtener_objeto
+            resultado.resultado_obtenido = self
 
-              resultado
-            end
-          rescue Exception => e
-            resultado = ResultadoExploto.new
-            resultado.clase_error = e.class
-            resultado.mensage_error = e.backtrace
             resultado
-          end} )
-      end
+          end
+        rescue Exception => e
+          resultado = ResultadoExploto.new
+          resultado.clase_error = e.class
+          resultado.mensage_error = e.backtrace
+          resultado
+        end} )
+    end
 
   end
 
@@ -152,7 +153,7 @@ class Motor
         resultado.nombre_test = test.to_s
         resultado.nombre_test_suite = instancia.class.to_s
 
-      lista_resultados.add(resultado)
+        lista_resultados.add(resultado)
       end
     }
 
@@ -211,108 +212,4 @@ class Motor
 
   end
 
-end
-
-
-#----------------------------------------------------------------------------------------#
-# Validacion es el objeto que crean los metodos del mixin Condicion (ser, mayor_a, etc.)
-# y es el parametro de la funcion deberia del mixin Deberia
-class Validacion
-
-  attr_accessor :objeto
-
-  # initialize(Object) -> Validacion
-  def initialize(objeto_para_preguntar_equal)
-    self.objeto = objeto_para_preguntar_equal
-  end
-
-  # obtener_objeto -> Object
-  # debuelve el atributo objeto, pero se fija si ese objeto es de tipo
-  # Validacion para pedirselo a el, esto pasa por el decorado de las validaciones
-  # que generan los metodos del mixin Condicion
-  def obtener_objeto
-    if objeto.class.equal?(Validacion)
-      objeto.obtener_objeto
-    else
-      self.objeto
-    end
-  end
-
-end
-
-class ValidacionTener_ < Validacion
-
-  attr_accessor :metodo
-
-  # initialize(Object) -> Validacion
-  def initialize(metodo_tener_, objeto_para_preguntar_equal)
-    self.objeto = objeto_para_preguntar_equal
-    self.metodo = metodo_tener_
-  end
-end
-
-#----------------------------------------------------------------------------------------#
-# Resultado es lo que devuelve la funcion deberia
-class Resultado
-  attr_accessor :resultado_del_equal,:nombre_test,:nombre_test_suite
-
-  def paso?
-    false
-  end
-
-  def fallo?
-    false
-  end
-
-  def exploto?
-    false
-  end
-end
-
-class ResultadoPaso < Resultado
-
-  def initialize
-    self.resultado_del_equal = true
-  end
-
-  def paso?
-    true
-  end
-
-  def mostrarse
-    puts "#{nombre_test}. "
-  end
-
-end
-
-class ResultadoFallo < Resultado
-    attr_accessor :resultado_esperado, :resultado_obtenido
-
-   def initialize
-     self.resultado_del_equal = false
-   end
-
-  def fallo?
-    true
-  end
-
-    def mostrarse
-      puts "#{self.nombre_test}, se esperaba: #{self.resultado_esperado} y se obtuvo #{self.resultado_obtenido}."
-    end
-end
-
-class ResultadoExploto < Resultado
-  attr_accessor :clase_error, :mensage_error
-
-  def initialize
-    self.resultado_del_equal = false
-  end
-
-  def exploto?
-    true
-  end
-
-  def mostrarse
-    puts "#{nombre_test}, con causa #{clase_error} y stack #{mensage_error}."
-  end
 end
