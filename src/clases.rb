@@ -138,7 +138,7 @@ class Motor
   # testear_test_especifico([Class, :Method..])-> [Resultado]
   # testea pasandole la clase de uno de los test suite cargados
   # y los test especificos que se quiere correr
-  private
+
   def testear_test_especifico(args)
     instancia = args[0].new
     lista_methodos = args[1..0].clone
@@ -158,7 +158,7 @@ class Motor
   # testear_todo_lo_cargado() -> [Resultado]
   # testea todos los test de todos los test suite cargados
   # en el initialize de la instancia del motor
-  private
+
   def testear_todo_lo_cargado
     lista_resultados = Set.new
 
@@ -174,7 +174,7 @@ class Motor
   # testear_un_test_suit(Class) -> [Resultado]
   # corre todos los test del test suite pasado por parametro,
   # el test suite debe estar cargado
-  private
+
   def testear_un_test_suit(clase_test)
     instancia = clase_test.new
     lista_resultados = Set.new
