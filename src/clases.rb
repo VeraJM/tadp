@@ -93,6 +93,8 @@ class Motor
 
     olvidar_deberia_a_Object
 
+    mostrar_resultados lista_resultados
+
     lista_resultados
   end
 
@@ -190,6 +192,23 @@ class Motor
     lista_resultados
   end
 
+  def mostrar_resultados(resultados)
+    puts "Tests ejecutados: #{resultados.count},
+          tests pasados: #{resultados.count {|resultado|  resultado.paso?}},
+          tests fallidos: #{resultados.count {|resultado| resultado.fallo?}},
+          tests explotados: #{resultados.count{|resultado| resultado.exploto?}}."
+
+    puts 'Tests pasados:'
+    resultados.select {|resultado| resultado.paso?}.each {|pasado| pasado.mostrarse}
+
+    puts 'Tests fallidos:'
+    resultados.select {|resultado| resultado.fallo?}.each {|fallido| fallido.mostrarse}
+
+    puts 'Tests explotados:'
+    resultados.select {|resultado| resultado.exploto?}.each {|explotado| explotado.mostrarse}
+
+  end
+
 end
 
 
@@ -234,6 +253,18 @@ end
 # Resultado es lo que devuelve la funcion deberia
 class Resultado
   attr_accessor :resultado_del_equal,:nombre_test,:nombre_test_suite
+
+  def paso?
+    false
+  end
+
+  def fallo?
+    false
+  end
+
+  def exploto?
+    false
+  end
 end
 
 class ResultadoPaso < Resultado
@@ -241,6 +272,15 @@ class ResultadoPaso < Resultado
   def initialize
     self.resultado_del_equal = true
   end
+
+  def paso?
+    true
+  end
+
+  def mostrarse
+    puts "#{nombre_test}. "
+  end
+
 end
 
 class ResultadoFallo < Resultado
@@ -249,6 +289,14 @@ class ResultadoFallo < Resultado
    def initialize
      self.resultado_del_equal = false
    end
+
+  def fallo?
+    true
+  end
+
+    def mostrarse
+      puts "#{self.nombre_test}, se esperaba: #{self.resultado_esperado} y se obtuvo #{self.resultado_obtenido}."
+    end
 end
 
 class ResultadoExploto < Resultado
@@ -256,5 +304,13 @@ class ResultadoExploto < Resultado
 
   def initialize
     self.resultado_del_equal = false
+  end
+
+  def exploto?
+    true
+  end
+
+  def mostrarse
+    puts "#{nombre_test}, con causa #{clase_error} y stack #{mensage_error}."
   end
 end
