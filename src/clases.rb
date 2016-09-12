@@ -43,7 +43,7 @@ class Motor
   def redefinir_method_missing_a_suites_cargados
 
     @@lista_test_suites.each{ |clase|
-      clase.send(:define_method, :method_missing, proc {|simbolo, *args, &bloque|
+      clase.send(:define_method, :method_missing, proc {|simbolo, *args, &block|
         case
           when es_un_metodo_ser_?(simbolo)
             ser_(simbolo)
@@ -112,10 +112,10 @@ class Motor
 
               resultado
             end
-          rescue
+          rescue Exception => e
             resultado = ResultadoExploto.new
-            #resultado.clase_error = Error
-            #resultado.mensage_error = "ASDASD"
+            resultado.clase_error = e.class
+            resultado.mensage_error = e.backtrace
             resultado
           end} )
       end

@@ -47,19 +47,16 @@ module Condiciones
     crear_validacion_personalizada(clase_error) {|bloque|
       begin
         bloque.call
-      rescue self.objeto
-        true
-      rescue
         false
-      else
-        false
+      rescue Exception => e
+        e.is_a? clase_error
       end
     }
   end
 
   # ser_ (:Method) -> Validacion
   def ser_(metodo_con_ser_)
-    mensage = metodo_con_ser_.to_s[4,99] + "?"
+    mensage = metodo_con_ser_.to_s[4..-1] + '?'
 
     crear_validacion_personalizada(mensage) {|otro|
       otro.send(self.objeto)
@@ -67,15 +64,15 @@ module Condiciones
   end
 
   def tener_(atributo_con_tener_, un_objeto)
-    mensage = "@"+  atributo_con_tener_.to_s[6,99]
+    nombre_atributo = '@'+  atributo_con_tener_.to_s[6..-1]
 
     crear_validacion_personalizada(un_objeto) {|otro|
-      (self.objeto).equal?(otro.class.instance_variable_get(mensage))
+      (self.objeto).equal?(otro.class.instance_variable_get(nombre_atributo))
     }
   end
 
   # crear_validacion_personalizada(Object) {|Object| algo...} -> Validacion
-  # Crea una instancia de validacion con el metodo equal? personalizado que se le pasa como bloque
+  # Crea una instancia de validacion con el metodo cumple_condicion? personalizado que se le pasa como bloque
   # Dentro del bloque se necetita definir el parametro que recibe el equal? para comparar
   private
   def crear_validacion_personalizada(objeto_para_validar, &bloque)
