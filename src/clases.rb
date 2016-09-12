@@ -143,15 +143,17 @@ class Motor
 
   def testear_test_especifico(args)
     instancia = args[0].new
-    lista_methodos = args[1..0].clone
+    lista_methodos = args[1..-1]
     lista_resultados = Set.new
 
     lista_methodos.each { |test|
-      resultado = instancia.send(test).clone
-      resultado.nombre_test = test.to_s
-      resultado.nombre_test_suite = instancia.class.to_s
+      if(instancia.respond_to? test)
+        resultado = instancia.send(test)
+        resultado.nombre_test = test.to_s
+        resultado.nombre_test_suite = instancia.class.to_s
 
       lista_resultados.add(resultado)
+      end
     }
 
     lista_resultados
