@@ -21,6 +21,8 @@ class Test_de_prueba_ser
   def testear_que_true_es_igual_a_true
     true.deberia ser true
   end
+
+
 end
 
 #----------------------------------------------------------------------------------------#
