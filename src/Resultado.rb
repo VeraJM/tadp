@@ -44,5 +44,4 @@ class ResultadoPaso < Resultado
   def mostrarse
     puts "#{nombre_test}. "
   end
-
 end
