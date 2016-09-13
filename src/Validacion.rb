@@ -11,7 +11,7 @@ class Validacion
   end
 
   # obtener_objeto -> Object
-  # debuelve el atributo objeto, pero se fija si ese objeto es de tipo
+  # devuelve el atributo objeto, pero se fija si ese objeto es de tipo
   # Validacion para pedirselo a el, esto pasa por el decorado de las validaciones
   # que generan los metodos del mixin Condicion
   def obtener_objeto
@@ -21,5 +21,16 @@ class Validacion
       self.objeto
     end
   end
+end
 
+################################################################################################
+class ValidacionTener_ < Validacion
+
+  attr_accessor :metodo
+
+  # initialize(Object) -> Validacion
+  def initialize(metodo_tener_, objeto_para_preguntar_equal)
+    self.objeto = objeto_para_preguntar_equal
+    self.metodo = metodo_tener_
+  end
 end
