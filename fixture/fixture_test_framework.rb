@@ -1,16 +1,12 @@
 require_relative '../src/Motor'
 require_relative '../src/Resultado'
-require_relative '../src/ResultadoExploto'
-require_relative '../src/ResultadoFallo'
-require_relative '../src/ResultadoPaso'
 require_relative '../src/Validacion'
-require_relative '../src/ValidacionTener'
 
 require_relative '../src/Condiciones'
 require_relative '../src/Parser'
 
 #----------------------------------------------------------------------------------------#
-class MiSuiteDeTests
+class MiSuiteDeTestsq
   def testear_que_pasa_algo
   end
 

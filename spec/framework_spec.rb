@@ -2,10 +2,6 @@ require 'rspec'
 
 require_relative '../src/Motor'
 require_relative '../src/Resultado'
-require_relative '../src/ResultadoExploto'
-require_relative '../src/ResultadoFallo'
-require_relative '../src/ResultadoPaso'
-
 require_relative '../fixture/fixture_test_framework'
 
 
