@@ -112,10 +112,10 @@ describe 'test del framework' do
     lista_resultados = motor.testear
 
     expect( lista_resultados.select{ |resultado| resultado.paso?}.count ).to eq(1)
-    expect( lista_resultados.select{ |resultado| resultado.fallo?}.count ).to eq(1)
+    expect( lista_resultados.select{ |resultado| resultado.fallo?}.count ).to eq(2)
     #TODO el test de apellido chequea por un atributo que el objeto no tiene, chequear si deberia explotar o si deberia
     #dar test fallido, en caso de test fallido eliminar expect inferior y sumar 1 al expect superior
-    expect( lista_resultados.select{ |resultado| resultado.exploto?}.count ).to eq(1)
+    #expect( lista_resultados.select{ |resultado| resultado.exploto?}.count ).to eq(1)
   end
 end
 

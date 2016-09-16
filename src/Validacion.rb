@@ -15,11 +15,7 @@ class Validacion
   # Validacion para pedirselo a el, esto pasa por el decorado de las validaciones
   # que generan los metodos del mixin Condicion
   def obtener_objeto
-    if objeto.class.equal?(Validacion)
-      objeto.obtener_objeto
-    else
-      self.objeto
-    end
+     objeto.class.equal?(Validacion) ? objeto.obtener_objeto : self.objeto
   end
 end
 
