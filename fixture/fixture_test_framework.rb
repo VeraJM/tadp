@@ -6,7 +6,7 @@ require_relative '../src/Condiciones'
 require_relative '../src/Parser'
 
 #----------------------------------------------------------------------------------------#
-class MiSuiteDeTestsq
+class MiSuiteDeTests
   def testear_que_pasa_algo
   end
 
