@@ -195,21 +195,26 @@ class Motor
     lista_resultados
   end
 
+  def contarResultado(resultados,metodo)
+    resultados.count {|resultado| resultado.send(metodo)}
+  end
+
+  def mostrar_test(resultados,metodo)
+    resultados.select {|resultado| resultado.send(metodo)}.each {|test| test.mostrarse}
+  end
+
   def mostrar_resultados(resultados)
+
     puts "Tests ejecutados: #{resultados.count},
-          tests pasados: #{resultados.count {|resultado|  resultado.paso?}},
-          tests fallidos: #{resultados.count {|resultado| resultado.fallo?}},
-          tests explotados: #{resultados.count{|resultado| resultado.exploto?}}."
-
+    tests pasados: #{contarResultado(resultados,:paso?)},
+    tests fallidos: #{contarResultado(resultados,:fallo?)},
+    tests explotados: #{contarResultado(resultados,:exploto?)}."
     puts 'Tests pasados:'
-    resultados.select {|resultado| resultado.paso?}.each {|pasado| pasado.mostrarse}
-
+    mostrar_test(resultados,:paso?)
     puts 'Tests fallidos:'
-    resultados.select {|resultado| resultado.fallo?}.each {|fallido| fallido.mostrarse}
-
+    mostrar_test(resultados,:fallo?)
     puts 'Tests explotados:'
-    resultados.select {|resultado| resultado.exploto?}.each {|explotado| explotado.mostrarse}
-
+    mostrar_test(resultados,:exploto?)
   end
 
 end
