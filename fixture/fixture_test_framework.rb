@@ -82,6 +82,10 @@ class Prueba_Test_condiciones
     7.deberia entender :new
   end
 
+  def testear_que_no_funca_el_deberia_entender
+    7.deberia entender :saluda
+  end
+
 end
 
 #----------------------------------------------------------------------------------------#
