@@ -4,13 +4,14 @@ require_relative 'Parser'
 require_relative 'Condiciones'
 require_relative 'Mock'
 require_relative 'Manejo_Resultados'
-
+require_relative 'comportamiento'
 #----------------------------------------------------------------------------------------#
 # Motor es el encargado de cargar las clases de los test
 # y luego ejecutarlos creando una instancia y ejecutando testear()
 class Motor
-  include Parser, Mock, Manejo_Resultados
+  include Parser, Manejo_Resultados
 
+  @@metodos_mockeados
   @@lista_test_suites
 
   # initialize(clase_test) -> Motor
@@ -79,11 +80,21 @@ class Motor
     clase_test.instance_methods.select{ |metodo| es_un_test?(metodo)}
   end
 
+  def self.enseniar_mockear_a_class
+    Class.send(:define_method, :mockear, proc { |metodo, &block|
+      begin
+          Motor.agregar_metodo_mockeado(self, metodo, self.instance_methods.include?(metodo) ? self.instance_method(metodo) : nil)
+        self.send(:define_method, metodo, block)
+      end }
+    )
+  end
+
   # testear() -> [Resultado]
   # realiza el testeo dependiendo de los parametros que recibe
   def testear(*args)
 
     enseniar_deberia_a_Object
+    Motor.enseniar_mockear_a_class
 
     case
       when args.count == 0
@@ -99,6 +110,18 @@ class Motor
     mostrar_resultados lista_resultados
 
     lista_resultados
+  end
+
+  def self.agregar_metodo_mockeado(klass,metodo,comportamiento_viejo)
+    @@metodos_mockeados ||= []
+    @@metodos_mockeados << Comportamiento.new(klass,metodo,comportamiento_viejo)
+  end
+
+  def self.recomponer_comportamiento_mockeado
+    @@metodos_mockeados ||= []
+    @@metodos_mockeados.each do |comportamiento| comportamiento.recomponer()
+    end
+    @@metodos_mockeados = [] ##Los limpio para la siguiente corrida
   end
 
   # enseniar_deberia_a_Object -> void
@@ -201,11 +224,12 @@ class Motor
   private
   def ejecutar_test(instancia_test_suit, test)
 
-    enseniar_metodos_mock_a_Class
+    #enseniar_metodos_mock_a_Class
 
     resultado = instancia_test_suit.send(test)
 
-    olvidar_metodos_mock_de_Class
+    Motor.recomponer_comportamiento_mockeado
+    #olvidar_metodos_mock_de_Class
 
     resultado
   end

@@ -183,7 +183,7 @@ class Test_mock
       100
     end
 
-    respuesta = PersonalHome.new_mock.cantidad_personas
+    respuesta = PersonalHome.new.cantidad_personas
     respuesta.deberia ser 100
   end
 
@@ -194,7 +194,7 @@ class Test_mock
 
     #en el test anterior modifique la cantidad_personas para que devuelva 100
     #si no perderia el contexto deberia mantener ese 100, pero com lo pierde, vuelve al original que es 0
-    respuesta = PersonalHome.new_mock.cantidad_personas
+    respuesta = PersonalHome.new.cantidad_personas
     respuesta.deberia ser 0
   end
 
@@ -206,13 +206,17 @@ class Test_mock
     proc{PersonalHome.new.sarasa}.deberia explotar_con NoMethodError
   end
 
+  ##
+  # Este test estaba antes cuando habia objetos que salian de new y objetos que salian de new_mock
+  # Podriamos borrarlo
+
   def testear_que_no_se_ensucia_la_clase_mockeada
     PersonalHome.mockear(:cantidad_personas) do
       100
     end
 
     respuesta = PersonalHome.new.cantidad_personas
-    respuesta.deberia ser 0
+    respuesta.deberia ser 100
   end
 
 
@@ -222,7 +226,7 @@ class Test_mock
       10
     end
 
-    respuesta = PersonalHome.new_mock.duplico_cantidad_personas
+    respuesta = PersonalHome.new.duplico_cantidad_personas
     respuesta.deberia ser 20
   end
 
