@@ -1,3 +1,4 @@
+
 # tadp-2016c2-grupo2
 
 Repositorio dedicado al desarrollo del trabajo práctico de la materia Tecnicas avanzadas de programación de la Universidad
@@ -17,3 +18,4 @@ Los miembros del grupo encargados del desarrollo de esta herramienta son:
 Los ayudantes a cargo de supervisar al grupo son:
   -Ernesto Bossi
   -Juan Manuel Fernandes dos Santos
+
