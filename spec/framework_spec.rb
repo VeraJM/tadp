@@ -3,6 +3,7 @@ require 'rspec'
 require_relative '../src/Motor'
 require_relative '../src/Resultado'
 require_relative '../fixture/fixture_test_framework'
+require_relative '../src/comportamiento'
 
 
 describe 'test metaprogramacion del motor' do
@@ -219,4 +220,46 @@ describe 'prueba de tests unitarios' do
     lista_resultados = motor.testear Campo_de_explosiones_Test, :testear_que_no_explota_al_entender
     expect(lista_resultados.first.class).to eq(ResultadoFallo)
   end
+end
+
+describe 'test de mocks' do
+
+  motor = Motor.new PersonaHomeTests, Test_mock
+  Motor.enseniar_mockear_a_class
+
+  it 'se define el metodo mockear' do
+    expect(Class.respond_to? :mockear).to eq(true)
+  end
+
+  it 'se reemplaza el metodo mockeado' do
+    PersonalHome.mockear(:todas_las_personas) do [nico,axel,lean] end
+
+    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(true)
+    
+    Motor.recomponer_comportamiento_mockeado
+  end
+
+  it 'se quita el metodo mockeado a Motor luego del test'do
+    motor.testear PersonaHomeTests, :testear_que_personas_viejas_trae_solo_a_los_viejos
+    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(false)
+
+  end
+
+  it 'se pasa el test mockeando' do
+    lista_resultados = motor.testear Test_mock, :testear_que_el_mock_funca
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
+  end
+
+  it 'se borra el metodo mockear'do
+    Motor.olvidar_mockear_a_class
+    expect(Class.respond_to? :mockear).to eq(false)
+  end
+
+=begin
+  it 'falla el mockeo porque no esta definido el metodo' do
+    expect{PersonalHome.mockear(:gritar) do 'aaahh' end}.to raise_error(NoMethodError)
+
+  end
+=end
+
 end

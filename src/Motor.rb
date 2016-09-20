@@ -89,12 +89,18 @@ class Motor
     )
   end
 
+  def self.olvidar_mockear_a_class
+    Class.send(:undef_method, :mockear)
+  end
+
+
+
   # testear() -> [Resultado]
   # realiza el testeo dependiendo de los parametros que recibe
   def testear(*args)
 
     enseniar_deberia_a_Object
-    Motor.enseniar_mockear_a_class
+    self.class.enseniar_mockear_a_class
 
     case
       when args.count == 0
@@ -106,6 +112,7 @@ class Motor
     end
 
     olvidar_deberia_a_Object
+    self.class.recomponer_comportamiento_mockeado
 
     mostrar_resultados lista_resultados
 
@@ -233,5 +240,11 @@ class Motor
 
     resultado
   end
+
+  def self.metodos_mockeados
+    self.class_variable_get('@@metodos_mockeados').map{|comportamiento| comportamiento.metodo}
+
+  end
+
 
 end

@@ -167,6 +167,10 @@ end
 
 #----------------------------------------------------------------------------------------#
 class PersonalHome
+  def todas_las_personas
+    #bla bla bla
+  end
+
   def cantidad_personas
     0
   end
@@ -174,7 +178,28 @@ class PersonalHome
   def duplico_cantidad_personas
     self.cantidad_personas*2
   end
+
+  def personas_viejas
+    self.todas_las_personas.select {|p| p.viejo?}
+  end
+
 end
+
+class PersonaHomeTests
+  def testear_que_personas_viejas_trae_solo_a_los_viejos
+    nico = Persona.new('nico', 50)
+    axel = Persona.new('axel',60)
+    lean = Persona.new('lean',22)
+
+   PersonalHome.mockear(:todas_las_personas) do
+    [nico,axel,lean]
+    end
+   viejos = PersonalHome.new.personas_viejas
+
+   viejos.deberia ser [nico, axel]
+  end
+end
+
 
 class Test_mock
 
@@ -228,6 +253,6 @@ class Test_mock
 
     respuesta = PersonalHome.new.duplico_cantidad_personas
     respuesta.deberia ser 20
-  end
 
+  end
 end
