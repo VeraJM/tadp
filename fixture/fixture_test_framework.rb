@@ -165,3 +165,22 @@ class Prueba_azucar_sintactico_tener_Test
     pepe.deberia tener_apellido 'gomez'
   end
 end
+
+class Prueba_espia
+
+  def testear_que_se_llama_a_edad_al_preguntar_viejo
+    juan = Persona.new 'juan', 22
+    objeto_espiado = espiar(juan)
+    objeto_espiado.viejo?
+
+    objeto_espiado.deberia haber_recibido :edad
+  end
+
+  def testear_que_se_llama_a_joven_al_preguntar_viejo
+    juan = Persona.new 'juan', 22
+    espia = espiar(juan)
+    espia.viejo?
+
+    espia.deberia haber_recibido :joven?
+  end
+end

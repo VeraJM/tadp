@@ -66,6 +66,13 @@ module Condiciones
     }
   end
 
+  # recibe un objeto espia y pregunta si se llamo al metodo cuyo nombre se pasa por parametro y se almacena en
+  # el objeto validacion
+  # metodo => Validacion
+  def haber_recibido(symbol)
+    crear_validacion_personalizada(symbol) {|espia| espia.se_llamo_a(self.objeto) }
+  end
+
   # crear_validacion_personalizada(Object) {|Object| algo...} -> Validacion
   # Crea una instancia de validacion con el metodo cumple_condicion? personalizado que se le pasa como bloque
   # Dentro del bloque se necetita definir el parametro que recibe el equal? para comparar
