@@ -31,7 +31,7 @@ describe 'test metaprogramacion del motor' do
 
   it 'cargo varios suite y veo que se cargaron todos sus test' do
     motor = Motor.new Prueba_Test_condiciones, Test_de_prueba_ser
-    expect(motor.lista_de_test_cargados.count ).to eq(15)
+    expect(motor.lista_de_test_cargados.count ).to eq(16)
   end
 
 end

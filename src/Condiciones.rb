@@ -70,7 +70,7 @@ module Condiciones
   # el objeto validacion
   # metodo => Validacion
   def haber_recibido(symbol)
-    crear_validacion_personalizada(symbol) {|espia| espia.se_llamo_a(self.objeto) }
+    crear_validacion_espia(symbol) {|espia| espia.se_llamo_a(self.objeto) }
   end
 
   # crear_validacion_personalizada(Object) {|Object| algo...} -> Validacion
@@ -79,6 +79,13 @@ module Condiciones
   private
   def crear_validacion_personalizada(objeto_para_validar, &bloque)
     validacion = Validacion.new(objeto_para_validar)
+    validacion.singleton_class.send(:define_method, :equal?, bloque)
+
+    validacion
+  end
+
+  def crear_validacion_espia(objeto_para_validad, &bloque)
+    validacion = ValidacionEspia.new objeto_para_validad
     validacion.singleton_class.send(:define_method, :equal?, bloque)
 
     validacion

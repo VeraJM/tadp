@@ -14,6 +14,16 @@ module Espia
     end
   end
 
+  def llamadas_a(metodo)
+    self.metodos_llamados.select do |metodo_llamado| metodo_llamado.es? metodo end
+  end
+
+  def se_llamo_con_parametros(metodo, *args)
+    llamadas_a(metodo).any? do |metodo_llamado|
+      metodo_llamado.parametros.eql? args
+    end
+  end
+
   def respond_to?(sym, include_all = false)
     if sym.to_s.eql? 'haber_recibido'
       true

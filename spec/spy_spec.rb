@@ -25,4 +25,30 @@ describe 'tests de espionaje de objetos' do
     lista_resultados = un_motor.testear Prueba_espia, :testear_que_se_llama_a_joven_al_preguntar_viejo
     expect(lista_resultados.first.class).to eq(ResultadoFallo)
   end
+
+  it 'se deberia llamar a edad 1 sola vez al llamar a viejo?' do
+    lista_resultados = un_motor.testear Prueba_espia, :testear_que_al_llamar_a_viejo_edad_se_llama_1_vez
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
+  end
+
+  it 'se deberia llamar a edad la cantidad de veces correcta' do
+    lista_resultados = un_motor.testear Prueba_espia, :testear_que_se_llama_la_cantidad_de_veces_correcta
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
+  end
+
+  it 'no se deberia llamar a viejo al llamar edad' do
+    lista_resultados = un_motor.testear Prueba_espia, :testear_que_al_llamar_a_edad_no_se_llama_a_viejo
+    expect(lista_resultados.first.class).to eq(ResultadoFallo)
+  end
+
+  it 'se deberian registrar correctamete las llamadas con parametros' do
+    lista_resultados = un_motor.testear Prueba_espia, :testear_que_al_llamar_con_parametros_se_registren
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
+  end
+
+  it 'se deberian registrar correctamete las llamadas sin parametros' do
+    lista_resultados = un_motor.testear Prueba_espia, :testar_que_al_llamar_sin_parametros_no_se_registran
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
+  end
+
 end
