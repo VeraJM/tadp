@@ -134,6 +134,10 @@ class Motor
 
   end
 
+  # El metodo espiar recibe un objeto para que sea espiado.
+  # Se clona el objeto con el fin de no alterar el objeto original, al objeto clonado se le incluye el modulo Espia
+  # que contiene todos los metodos necesarios por un objeto espia. Por ultimo se lo manda a inicializar para que
+  # intervenga los metodos del objeto.
   def enseniar_espiar_a_suites
     clases_test_filtradas = obtener_test_suites
 
