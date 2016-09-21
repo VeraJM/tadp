@@ -85,6 +85,7 @@ class Prueba_Test_condiciones
   def testear_que_no_funca_el_deberia_entender
     7.deberia entender :saluda
   end
+
 end
 
 #----------------------------------------------------------------------------------------#
@@ -121,6 +122,10 @@ class Persona
 
   def equal?(otro)
     self.nombre = otro.nombre && self.edad = otro.edad
+  end
+
+  def metodo_con_parametros(*args)
+    #nada
   end
 
   def viejo?
@@ -164,6 +169,7 @@ class Prueba_azucar_sintactico_tener_Test
     pepe.deberia tener_apellido 'gomez'
   end
 end
+
 
 #----------------------------------------------------------------------------------------#
 class PersonalHome
@@ -253,6 +259,70 @@ class Test_mock
 
     respuesta = PersonalHome.new.duplico_cantidad_personas
     respuesta.deberia ser 20
+  end
+end
 
+class Prueba_espia
+
+  def testear_que_se_llama_a_edad_al_preguntar_viejo
+    juan = Persona.new 'juan', 22
+    objeto_espiado = espiar(juan)
+    objeto_espiado.viejo?
+
+    objeto_espiado.deberia haber_recibido :edad
+  end
+
+  def testear_que_se_llama_a_joven_al_preguntar_viejo
+    juan = Persona.new 'juan', 22
+    espia = espiar(juan)
+    espia.viejo?
+
+    espia.deberia haber_recibido :joven?
+  end
+
+  def testear_que_al_llamar_a_viejo_edad_se_llama_1_vez
+    juan = Persona.new 'juan', 22
+    juan = espiar(juan)
+    juan.viejo?
+
+    juan.deberia haber_recibido(:edad).veces(1)
+  end
+
+  def testear_que_se_llama_la_cantidad_de_veces_correcta
+    juan = Persona.new 'juan', 22
+    juan = espiar(juan)
+
+    juan.edad
+    juan.edad
+    juan.edad
+
+    juan.deberia haber_recibido(:edad).veces(3)
+  end
+
+  def testear_que_al_llamar_a_edad_no_se_llama_a_viejo
+    juan = Persona.new 'juan', 22
+    juan = espiar(juan)
+
+    juan.edad
+    juan.edad
+    juan.edad
+
+    juan.deberia haber_recibido(:viejo?).veces(1)
+  end
+
+  def testear_que_al_llamar_con_parametros_se_registren
+    juan = Persona.new 'juan', 22
+    juan = espiar(juan)
+    juan.metodo_con_parametros 'hola', 2, true
+
+    juan.deberia haber_recibido(:metodo_con_parametros).con_argumentos 'hola', 2, true
+  end
+
+  def testar_que_al_llamar_sin_parametros_no_se_registran
+    juan = Persona.new 'juan', 22
+    juan = espiar(juan)
+    juan.metodo_con_parametros
+
+    juan.deberia haber_recibido(:metodo_con_parametros).con_argumentos
   end
 end

@@ -30,3 +30,41 @@ class ValidacionTener_ < Validacion
     self.metodo = metodo_tener_
   end
 end
+################################################################################################
+# Este tipo de validacion se usa para los espias, extiende el comportamiento para poder entender veces(cantidad) y
+# con_argumentos(*args)
+class ValidacionEspia < Validacion
+
+  # numero => ValidacionEspia
+  # crea un nuevo proc que chequea la cantidad de llamados y lo agrega al metodo equals
+  def veces(cantidad)
+    validacion_cantidad = proc {|espia| espia.llamadas_a(self.objeto).length.equal? cantidad}
+    agregar_validacion validacion_cantidad
+
+    self
+  end
+
+  # lista de parametros => ValidacionEspia
+  # crea un nuevo proc que chequea los argumentos pasados al metodo y lo agrega al metodo equals
+  def con_argumentos(*args)
+    if not args.empty?
+      validacion_parametros = proc {|espia| espia.se_llamo_con_parametros(self.objeto, *args)}
+      agregar_validacion validacion_parametros
+    end
+
+    self
+  end
+
+  private
+
+  # toma el proc del metodo equals y el proc de la nueva validacion y los junta en un nuevo metodo equals con un
+  # "y" logico ya que ambas devuelven un booleano
+  def agregar_validacion(nueva_validacion)
+    antigua_validacion = method(:equal?).to_proc
+
+    define_singleton_method :equal?, proc {|espia|
+      (antigua_validacion.call espia) && (nueva_validacion.call espia)
+    }
+  end
+
+end

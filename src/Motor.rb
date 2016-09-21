@@ -5,6 +5,8 @@ require_relative 'Condiciones'
 require_relative 'Mock'
 require_relative 'Manejo_Resultados'
 require_relative 'comportamiento'
+require_relative 'Espia'
+
 #----------------------------------------------------------------------------------------#
 # Motor es el encargado de cargar las clases de los test
 # y luego ejecutarlos creando una instancia y ejecutando testear()
@@ -28,19 +30,21 @@ class Motor
 
     incluir_condiciones_y_parser_a_suites_cargados
     redefinir_method_missing_a_suites_cargados
+    enseniar_espiar_a_suites
   end
 
   # enseniar_condiciones_a_clase(Class) -> void
   # hace que la clase entienda los mensajes ser, mayor_a, etc
   def incluir_condiciones_y_parser_a_suites_cargados
 
-    clases_test_filtradas = @@lista_test_suites.select {|clase| es_un_test_suite?(clase)}
+    clases_test_filtradas = obtener_test_suites
 
     clases_test_filtradas.each { |clase|
       clase.include Condiciones
       clase.include Parser
     }
   end
+
 
   # redefinir_method_missing_a_suites_cargados -> Void
   # redefine el metodo missing para los azucares sintacticos
@@ -54,7 +58,7 @@ class Motor
           when es_un_metodo_tener_?(simbolo)
             tener_(simbolo, args[0])
           else
-            super
+            super simbolo, include_all, &block
         end
       })
     }
@@ -134,6 +138,13 @@ class Motor
   # enseniar_deberia_a_Object -> void
   # fuerza a que todos los objetos entiendan deberia
   private
+  def obtener_test_suites
+    @@lista_test_suites.select {|clase| es_un_test_suite?(clase)}
+  end
+
+  private
+  # enseniar_deberia_a_Object -> void
+  # fuerza a que todos los objetos entiendan deberia
   def enseniar_deberia_a_Object
     unless Object.instance_methods.include? :deberia
       Object.send(:define_method, :deberia, proc {|objeto_a_comparar|
@@ -157,10 +168,28 @@ class Motor
 
   end
 
+  # El metodo espiar recibe un objeto para que sea espiado.
+  # Se clona el objeto con el fin de no alterar el objeto original, al objeto clonado se le incluye el modulo Espia
+  # que contiene todos los metodos necesarios por un objeto espia. Por ultimo se lo manda a inicializar para que
+  # intervenga los metodos del objeto.
+  def enseniar_espiar_a_suites
+    clases_test_filtradas = obtener_test_suites
+
+    clases_test_filtradas.each { |clase|
+      clase.send :define_method, :espiar, proc {|un_objeto|
+        espia = un_objeto.clone
+        espia.singleton_class.include Espia
+        espia.inicializar
+
+        espia}
+    }
+  end
+
   # olvidar_deberia_a_Object -> void
   def olvidar_deberia_a_Object
     Object.send(:undef_method, :deberia)
   end
+
 
   # esta_cargado?(Class)-> bool
   # devuelve si la clase test fue cargado en el initialize
@@ -246,5 +275,27 @@ class Motor
 
   end
 
+
+  def contarResultado(resultados,metodo)
+    resultados.count {|resultado| resultado.send(metodo)}
+  end
+
+  def mostrar_test(resultados,metodo)
+    resultados.select {|resultado| resultado.send(metodo)}.each {|test| test.mostrarse}
+  end
+
+  def mostrar_resultados(resultados)
+
+    puts "Tests ejecutados: #{resultados.count},
+    tests pasados: #{contarResultado(resultados,:paso?)},
+    tests fallidos: #{contarResultado(resultados,:fallo?)},
+    tests explotados: #{contarResultado(resultados,:exploto?)}."
+    puts 'Tests pasados:'
+    mostrar_test(resultados,:paso?)
+    puts 'Tests fallidos:'
+    mostrar_test(resultados,:fallo?)
+    puts 'Tests explotados:'
+    mostrar_test(resultados,:exploto?)
+  end
 
 end

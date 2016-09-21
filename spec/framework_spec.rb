@@ -235,7 +235,7 @@ describe 'test de mocks' do
     PersonalHome.mockear(:todas_las_personas) do [nico,axel,lean] end
 
     expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(true)
-    
+
     Motor.recomponer_comportamiento_mockeado
   end
 
