@@ -2,7 +2,6 @@ require 'set'
 
 require_relative 'Parser'
 require_relative 'Condiciones'
-require_relative 'Mock'
 require_relative 'Manejo_Resultados'
 require_relative 'comportamiento'
 require_relative 'Espia'
@@ -84,6 +83,11 @@ class Motor
     clase_test.instance_methods.select{ |metodo| es_un_test?(metodo)}
   end
 
+  #----------------------------------------------------------------------#
+  # METODOS MOCK #
+  # Definidos como metodos de clase para que los objetos pueden guardar su comportamiento
+  # en la clase Motor
+
   def self.enseniar_mockear_a_class
     Class.send(:define_method, :mockear, proc { |metodo, &block|
       begin
@@ -97,7 +101,24 @@ class Motor
     Class.send(:undef_method, :mockear)
   end
 
+  def self.agregar_metodo_mockeado(klass,metodo,comportamiento_viejo)
+    @@metodos_mockeados ||= []
+    @@metodos_mockeados << Comportamiento.new(klass,metodo,comportamiento_viejo)
+  end
 
+  def self.recomponer_comportamiento_mockeado
+    @@metodos_mockeados ||= []
+    @@metodos_mockeados.each do |comportamiento| comportamiento.recomponer()
+    end
+    @@metodos_mockeados = [] ##Los limpio para la siguiente corrida
+  end
+
+  def self.metodos_mockeados
+    self.class_variable_get('@@metodos_mockeados').map{|comportamiento| comportamiento.metodo}
+
+  end
+
+#-------------------------------------------------------------------------#
 
   # testear() -> [Resultado]
   # realiza el testeo dependiendo de los parametros que recibe
@@ -123,20 +144,7 @@ class Motor
     lista_resultados
   end
 
-  def self.agregar_metodo_mockeado(klass,metodo,comportamiento_viejo)
-    @@metodos_mockeados ||= []
-    @@metodos_mockeados << Comportamiento.new(klass,metodo,comportamiento_viejo)
-  end
 
-  def self.recomponer_comportamiento_mockeado
-    @@metodos_mockeados ||= []
-    @@metodos_mockeados.each do |comportamiento| comportamiento.recomponer()
-    end
-    @@metodos_mockeados = [] ##Los limpio para la siguiente corrida
-  end
-
-  # enseniar_deberia_a_Object -> void
-  # fuerza a que todos los objetos entiendan deberia
   private
   def obtener_test_suites
     @@lista_test_suites.select {|clase| es_un_test_suite?(clase)}
@@ -269,12 +277,6 @@ class Motor
 
     resultado
   end
-
-  def self.metodos_mockeados
-    self.class_variable_get('@@metodos_mockeados').map{|comportamiento| comportamiento.metodo}
-
-  end
-
 
   def contarResultado(resultados,metodo)
     resultados.count {|resultado| resultado.send(metodo)}
