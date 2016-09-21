@@ -24,10 +24,10 @@ class Resultado
 end
 ##########################################################################
 class ResultadoExploto < Resultado
-  attr_accessor :clase_error, :mensage_error
+  attr_accessor :clase_error, :mensaje_error
 
   def mostrarse
-    puts "#{nombre_test}, con causa #{clase_error} y stack #{mensage_error}."
+    puts "#{nombre_test}, con causa #{clase_error} y stack #{mensaje_error}."
   end
 end
 ##########################################################################

@@ -44,7 +44,6 @@ class Motor
     }
   end
 
-
   # redefinir_method_missing_a_suites_cargados -> Void
   # redefine el metodo missing para los azucares sintacticos
   def redefinir_method_missing_a_suites_cargados
@@ -157,7 +156,7 @@ class Motor
     unless Object.instance_methods.include? :deberia
       Object.send(:define_method, :deberia, proc {|objeto_a_comparar|
         begin
-          if objeto_a_comparar.equal?(self)
+          if objeto_a_comparar.validar(self)
             resultado = ResultadoPaso.new
           else
             resultado = ResultadoFallo.new
@@ -169,7 +168,7 @@ class Motor
         rescue Exception => e
           resultado = ResultadoExploto.new
           resultado.clase_error = e.class
-          resultado.mensage_error = e.backtrace
+          resultado.mensaje_error = e.backtrace
           resultado
         end} )
     end
@@ -198,7 +197,6 @@ class Motor
     Object.send(:undef_method, :deberia)
   end
 
-
   # esta_cargado?(Class)-> bool
   # devuelve si la clase test fue cargado en el initialize
   # de la instancia creada del Motor
@@ -224,7 +222,6 @@ class Motor
         lista_resultados.add(resultado)
       end
     }
-
     lista_resultados
   end
 
@@ -240,7 +237,6 @@ class Motor
         lista_resultados.add resultado
       }
     }
-
     lista_resultados
   end
 
@@ -259,7 +255,6 @@ class Motor
 
       lista_resultados.add resultado
     }
-
     lista_resultados
   end
 

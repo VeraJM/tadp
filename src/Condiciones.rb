@@ -4,14 +4,18 @@
 # hardcodeado equal?, la funcion deberia ejecuta el equal? pasandole
 # como parametro el objeto que invoco al deberia
 # que recibe la funcion deberia que entiende Object
+
+require_relative '../src/Validacion'
 module Condiciones
 
   # ser (un_objeto)-> Validacion
   def ser (un_objeto)
-    if un_objeto.class.equal?(String)
-      crear_validacion_personalizada(un_objeto) {|otro| self.objeto == otro}
+    if un_objeto.is_a? Validacion
+      crear_validacion_personalizada(un_objeto) {|otro| self.objeto.validar(otro) }
     else
-      crear_validacion_personalizada(un_objeto) {|otro| self.objeto.equal?(otro)}
+       crear_validacion_personalizada(un_objeto) {|otro|
+         objeto.eql? otro
+       }
     end
   end
 
@@ -55,9 +59,9 @@ module Condiciones
 
   # ser_ (:Method) -> Validacion
   def ser_(metodo_con_ser_)
-    mensage = metodo_con_ser_.to_s[4..-1] + '?'
+    mensaje = metodo_con_ser_.to_s[4..-1] + '?'
 
-    crear_validacion_personalizada(mensage) {|otro|
+    crear_validacion_personalizada(mensaje) {|otro|
       otro.send(self.objeto)
     }
   end
@@ -82,15 +86,15 @@ module Condiciones
   # Dentro del bloque se necetita definir el parametro que recibe el equal? para comparar
   private
   def crear_validacion_personalizada(objeto_para_validar, &bloque)
-    validacion = Validacion.new(objeto_para_validar)
-    validacion.singleton_class.send(:define_method, :equal?, bloque)
+    validacion = Validacion.new objeto_para_validar
+    validacion.singleton_class.send(:define_method, :validar, bloque)
 
     validacion
   end
 
   def crear_validacion_espia(objeto_para_validad, &bloque)
     validacion = ValidacionEspia.new objeto_para_validad
-    validacion.singleton_class.send(:define_method, :equal?, bloque)
+    validacion.singleton_class.send(:define_method, :validar, bloque)
 
     validacion
   end

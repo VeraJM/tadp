@@ -60,9 +60,9 @@ class ValidacionEspia < Validacion
   # toma el proc del metodo equals y el proc de la nueva validacion y los junta en un nuevo metodo equals con un
   # "y" logico ya que ambas devuelven un booleano
   def agregar_validacion(nueva_validacion)
-    antigua_validacion = method(:equal?).to_proc
+    antigua_validacion = method(:validar).to_proc
 
-    define_singleton_method :equal?, proc {|espia|
+    define_singleton_method :validar, proc {|espia|
       (antigua_validacion.call espia) && (nueva_validacion.call espia)
     }
   end

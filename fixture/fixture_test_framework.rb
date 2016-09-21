@@ -34,6 +34,11 @@ class Test_de_prueba_ser
   def testear_que_hola_es_igual_a_chau
     'hola'.deberia ser 'chau'
   end
+
+  def testear_que_dos_strings_son_iguales
+    'hola'.deberia ser 'hola'
+  end
+
 end
 
 #----------------------------------------------------------------------------------------#
@@ -51,7 +56,7 @@ class Prueba_Test_condiciones
   end
 
   def testear_que_2_menor_a_100
-    3.deberia ser menor_a 100
+    2.deberia ser menor_a 100
   end
 
   def testear_que_6_menor_a_3
@@ -85,7 +90,6 @@ class Prueba_Test_condiciones
   def testear_que_no_funca_el_deberia_entender
     7.deberia entender :saluda
   end
-
 end
 
 #----------------------------------------------------------------------------------------#
