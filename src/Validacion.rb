@@ -55,10 +55,9 @@ class ValidacionEspia < Validacion
     self
   end
 
-  private
-
-  # toma el proc del metodo equals y el proc de la nueva validacion y los junta en un nuevo metodo equals con un
+  # toma el proc del metodo equals y el proc de la nueva validacion y los junta en un nuevo metodo :validar con un
   # "y" logico ya que ambas devuelven un booleano
+  private
   def agregar_validacion(nueva_validacion)
     antigua_validacion = method(:validar).to_proc
 

@@ -1,9 +1,9 @@
 # Condiciones es un mixin que le da a las clasesTest
 # los mensajes de validacion
 # Cada funcion retorna un objeto de tipo Validacion con un metodo
-# hardcodeado equal?, la funcion deberia ejecuta el equal? pasandole
+# :validar, la funcion deberia lo ejecuta pasandole
 # como parametro el objeto que invoco al deberia
-# que recibe la funcion deberia que entiende Object
+# que recibe el metodo ;deberia que entiende Object
 
 require_relative '../src/Validacion'
 module Condiciones
@@ -11,12 +11,11 @@ module Condiciones
   # ser (un_objeto)-> Validacion
   def ser (un_objeto)
     if un_objeto.is_a? Validacion
-      crear_validacion_personalizada(un_objeto) {|otro| self.objeto.validar(otro) }
+      procedimiento = proc {|otro| self.objeto.validar(otro) }
     else
-       crear_validacion_personalizada(un_objeto) {|otro|
-         objeto.eql? otro
-       }
+      procedimiento = proc{|otro| objeto.eql? otro }
     end
+    crear_validacion_personalizada(un_objeto, &procedimiento)
   end
 
   # mayor_a (un_objeto)-> Validacion
@@ -31,12 +30,11 @@ module Condiciones
 
   # uno_de_estos(Objetos) -> Validacion
   def uno_de_estos (*args)
-    if args.count == 1 && args[0].class.equal?([].class)
+    if args.count == 1 && args[0].class.equal?(Array)
       una_lista = args[0]
     else
       una_lista = args
     end
-
     crear_validacion_personalizada(una_lista) {|otro| self.objeto.include? otro}
   end
 
@@ -61,9 +59,7 @@ module Condiciones
   def ser_(metodo_con_ser_)
     mensaje = metodo_con_ser_.to_s[4..-1] + '?'
 
-    crear_validacion_personalizada(mensaje) {|otro|
-      otro.send(self.objeto)
-    }
+    crear_validacion_personalizada(mensaje) {|otro| otro.send(self.objeto)}
   end
 
   def tener_(atributo_con_tener_, un_objeto)
@@ -83,7 +79,7 @@ module Condiciones
 
   # crear_validacion_personalizada(Object) {|Object| algo...} -> Validacion
   # Crea una instancia de validacion con el metodo cumple_condicion? personalizado que se le pasa como bloque
-  # Dentro del bloque se necetita definir el parametro que recibe el equal? para comparar
+  # Dentro del bloque se necetita definir el parametro que recibe :validar
   private
   def crear_validacion_personalizada(objeto_para_validar, &bloque)
     validacion = Validacion.new objeto_para_validar

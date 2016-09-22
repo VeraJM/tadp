@@ -114,7 +114,6 @@ describe 'test del framework' do
     motor = Motor.new Prueba_azucar_sintactico_tener_Test
     lista_resultados = motor.testear
 
-
     expect(contarResultados(lista_resultados,:paso?)).to eq(1)
     expect(contarResultados(lista_resultados,:fallo?)).to eq(2)
     #TODO el test de apellido chequea por un atributo que el objeto no tiene, chequear si deberia explotar o si deberia
@@ -130,7 +129,6 @@ describe 'test del framework' do
     expect(contarResultados(lista_resultados,:fallo?)).to eq(0)
     expect(contarResultados(lista_resultados,:exploto?)).to eq(0)
   end
-
 end
 
 describe 'prueba de tests unitarios' do
@@ -253,7 +251,6 @@ describe 'test de mocks' do
   it 'se quita el metodo mockeado a Motor luego del test'do
     motor.testear PersonaHomeTests, :testear_que_personas_viejas_trae_solo_a_los_viejos
     expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(false)
-
   end
 
   it 'se pasa el test mockeando' do
@@ -266,11 +263,11 @@ describe 'test de mocks' do
     expect(Class.respond_to? :mockear).to eq(false)
   end
 
-=begin
-  it 'falla el mockeo porque no esta definido el metodo' do
-    expect{PersonalHome.mockear(:gritar) do 'aaahh' end}.to raise_error(NoMethodError)
+  it 'falla el mockeo porque no esta definido el metodo a mockear' do
+    lista_resultados = motor.testear Test_mock, :testear_que_explota_porque_no_entiende
+    expect(lista_resultados.first.class).to eq(ResultadoPaso)
 
+    # expect{PersonalHome.mockear(:gritar) do 'aaahh' end}.to raise_error(NoMethodError)
   end
-=end
 
 end

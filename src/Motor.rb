@@ -20,15 +20,15 @@ class Motor
   def initialize (*clases_test)
 
     @@lista_test_suites = clases_test.clone
-    preparar_tests_suite_cargados
+    self.preparar_tests_suite_cargados
   end
 
   # preparar_tests_suite_cargados -> Void
   # prepara el motor para la ejecucion de los test
   def preparar_tests_suite_cargados
 
-    incluir_condiciones_y_parser_a_suites_cargados
-    redefinir_method_missing_a_suites_cargados
+    self.incluir_condiciones_y_parser_a_suites_cargados
+    self.redefinir_method_missing_a_suites_cargados
     enseniar_espiar_a_suites
   end
 
@@ -72,7 +72,6 @@ class Motor
         @lista_test.add test
       }
     }
-
     @lista_test
   end
 
@@ -109,7 +108,7 @@ class Motor
     @@metodos_mockeados ||= []
     @@metodos_mockeados.each do |comportamiento| comportamiento.recomponer()
     end
-    @@metodos_mockeados = [] ##Los limpio para la siguiente corrida
+    @@metodos_mockeados.clear ##Los limpio para la siguiente corrida
   end
 
   def self.metodos_mockeados
@@ -142,7 +141,6 @@ class Motor
 
     lista_resultados
   end
-
 
   private
   def obtener_test_suites
@@ -263,13 +261,9 @@ class Motor
   private
   def ejecutar_test(instancia_test_suit, test)
 
-    #enseniar_metodos_mock_a_Class
-
     resultado = instancia_test_suit.send(test)
 
     Motor.recomponer_comportamiento_mockeado
-    #olvidar_metodos_mock_de_Class
-
     resultado
   end
 
