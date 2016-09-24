@@ -3,7 +3,7 @@ require 'set'
 require_relative 'Parser'
 require_relative 'Condiciones'
 require_relative 'Manejo_Resultados'
-require_relative 'comportamiento'
+require_relative 'Comportamiento'
 require_relative 'Espia'
 
 #----------------------------------------------------------------------------------------#

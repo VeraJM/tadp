@@ -1,5 +1,5 @@
 require 'rspec'
-require_relative '../fixture/fixture_test_framework'
+require_relative '../fixture/fixture_test_espiar'
 
 describe 'tests de espionaje de objetos' do
 
@@ -47,7 +47,7 @@ describe 'tests de espionaje de objetos' do
   end
 
   it 'se deberian registrar correctamete las llamadas sin parametros' do
-    lista_resultados = un_motor.testear Prueba_espia, :testar_que_al_llamar_sin_parametros_no_se_registran
+    lista_resultados = un_motor.testear Prueba_espia, :testear_que_al_llamar_sin_parametros_no_se_registran
     expect(lista_resultados.first.class).to eq(ResultadoPaso)
   end
 

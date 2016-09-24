@@ -3,8 +3,8 @@ require 'rspec'
 require_relative '../src/Motor'
 require_relative '../src/Resultado'
 require_relative '../fixture/fixture_test_framework'
-require_relative '../src/comportamiento'
-
+require_relative '../src/Comportamiento'
+require_relative '../fixture/fixture_test_mock'
 
 describe 'test metaprogramacion del motor' do
 
@@ -116,9 +116,7 @@ describe 'test del framework' do
 
     expect(contarResultados(lista_resultados,:paso?)).to eq(1)
     expect(contarResultados(lista_resultados,:fallo?)).to eq(2)
-    #TODO el test de apellido chequea por un atributo que el objeto no tiene, chequear si deberia explotar o si deberia
-    #dar test fallido, en caso de test fallido eliminar expect inferior y sumar 1 al expect superior
-    #expect( lista_resultados.select{ |resultado| resultado.exploto?}.count ).to eq(1)
+
   end
 
   it 'prueba del mock' do

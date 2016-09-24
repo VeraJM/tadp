@@ -1,9 +1,11 @@
+require_relative '../fixture/Modelos/Persona'
 require_relative '../src/Motor'
 require_relative '../src/Resultado'
 require_relative '../src/Validacion'
 
 require_relative '../src/Condiciones'
 require_relative '../src/Parser'
+
 
 #----------------------------------------------------------------------------------------#
 class MiSuiteDeTests
@@ -112,32 +114,6 @@ class Campo_de_explosiones_Test
   end
 end
 
-
-#----------------------------------------------------------------------------------------#
-class Persona
-  attr_accessor :nombre, :edad
-
-  @suenio = 20
-
-  def initialize(nombre, edad)
-    self.edad = edad
-    self.nombre = nombre
-  end
-
-  def equal?(otro)
-    self.nombre = otro.nombre && self.edad = otro.edad
-  end
-
-  def metodo_con_parametros(*args)
-    #nada
-  end
-
-  def viejo?
-    self.edad > 40
-  end
-end
-
-
 class Prueba_azucar_sintactico_ser_Test
 
   def testear_que_pepe_deberia_ser_viejo
@@ -171,162 +147,5 @@ class Prueba_azucar_sintactico_tener_Test
   def testear_que_pepe_deberia_tener_apellido_gomez
     pepe = Persona.new 'pepe', 30
     pepe.deberia tener_apellido 'gomez'
-  end
-end
-
-
-#----------------------------------------------------------------------------------------#
-class PersonalHome
-  def todas_las_personas
-    #bla bla bla
-  end
-
-  def cantidad_personas
-    0
-  end
-
-  def duplico_cantidad_personas
-    self.cantidad_personas*2
-  end
-
-  def personas_viejas
-    self.todas_las_personas.select {|p| p.viejo?}
-  end
-
-end
-
-class PersonaHomeTests
-  def testear_que_personas_viejas_trae_solo_a_los_viejos
-    nico = Persona.new('nico', 50)
-    axel = Persona.new('axel',60)
-    lean = Persona.new('lean',22)
-
-   PersonalHome.mockear(:todas_las_personas) do
-    [nico,axel,lean]
-    end
-   viejos = PersonalHome.new.personas_viejas
-
-   viejos.deberia ser [nico, axel]
-  end
-end
-
-
-class Test_mock
-
-  def testear_que_el_mock_funca
-    PersonalHome.mockear(:cantidad_personas) do
-      100
-    end
-
-    respuesta = PersonalHome.new.cantidad_personas
-    respuesta.deberia ser 100
-  end
-
-  def testear_que_se_pierde_el_contexto_entre_tests
-    PersonalHome.mockear(:nuevo_metodo) do
-      "no importa, estoy probando cantidad_personas"
-    end
-
-    #en el test anterior modifique la cantidad_personas para que devuelva 100
-    #si no perderia el contexto deberia mantener ese 100, pero com lo pierde, vuelve al original que es 0
-    respuesta = PersonalHome.new.cantidad_personas
-    respuesta.deberia ser 0
-  end
-
-  def testear_que_explota_porque_no_entiende
-    PersonalHome.mockear(:nueva_funcion) do
-      "no me van a usar"
-    end
-
-    proc{PersonalHome.new.sarasa}.deberia explotar_con NoMethodError
-  end
-
-  ##
-  # Este test estaba antes cuando habia objetos que salian de new y objetos que salian de new_mock
-  # Podriamos borrarlo
-
-  def testear_que_no_se_ensucia_la_clase_mockeada
-    PersonalHome.mockear(:cantidad_personas) do
-      100
-    end
-
-    respuesta = PersonalHome.new.cantidad_personas
-    respuesta.deberia ser 100
-  end
-
-
-  def testear_que_un_metodo_llama_a_otro
-
-    PersonalHome.mockear(:cantidad_personas) do
-      10
-    end
-
-    respuesta = PersonalHome.new.duplico_cantidad_personas
-    respuesta.deberia ser 20
-  end
-end
-
-class Prueba_espia
-
-  def testear_que_se_llama_a_edad_al_preguntar_viejo
-    juan = Persona.new 'juan', 22
-    objeto_espiado = espiar(juan)
-    objeto_espiado.viejo?
-
-    objeto_espiado.deberia haber_recibido :edad
-  end
-
-  def testear_que_se_llama_a_joven_al_preguntar_viejo
-    juan = Persona.new 'juan', 22
-    espia = espiar(juan)
-    espia.viejo?
-
-    espia.deberia haber_recibido :joven?
-  end
-
-  def testear_que_al_llamar_a_viejo_edad_se_llama_1_vez
-    juan = Persona.new 'juan', 22
-    juan = espiar(juan)
-    juan.viejo?
-
-    juan.deberia haber_recibido(:edad).veces(1)
-  end
-
-  def testear_que_se_llama_la_cantidad_de_veces_correcta
-    juan = Persona.new 'juan', 22
-    juan = espiar(juan)
-
-    juan.edad
-    juan.edad
-    juan.edad
-
-    juan.deberia haber_recibido(:edad).veces(3)
-  end
-
-  def testear_que_al_llamar_a_edad_no_se_llama_a_viejo
-    juan = Persona.new 'juan', 22
-    juan = espiar(juan)
-
-    juan.edad
-    juan.edad
-    juan.edad
-
-    juan.deberia haber_recibido(:viejo?).veces(1)
-  end
-
-  def testear_que_al_llamar_con_parametros_se_registren
-    juan = Persona.new 'juan', 22
-    juan = espiar(juan)
-    juan.metodo_con_parametros 'hola', 2, true
-
-    juan.deberia haber_recibido(:metodo_con_parametros).con_argumentos 'hola', 2, true
-  end
-
-  def testar_que_al_llamar_sin_parametros_no_se_registran
-    juan = Persona.new 'juan', 22
-    juan = espiar(juan)
-    juan.metodo_con_parametros
-
-    juan.deberia haber_recibido(:metodo_con_parametros).con_argumentos
   end
 end

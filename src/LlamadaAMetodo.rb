@@ -1,13 +1,13 @@
 class LlamadaAMetodo
   attr_accessor :nombre_metodo, :parametros
 
-  def initialize nombre_metodo_llamado, parametros_recibidos = []
-    self.nombre_metodo = nombre_metodo_llamado
-    self.parametros = parametros_recibidos
+  def initialize un_metodo, parametros = []
+    self.nombre_metodo = un_metodo
+    self.parametros = parametros
   end
 
-  def es?(metodo)
-    metodo.eql? nombre_metodo
+  def es?(un_metodo)
+    un_metodo.eql? nombre_metodo
   end
 
 end
