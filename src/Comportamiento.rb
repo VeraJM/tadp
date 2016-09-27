@@ -8,12 +8,11 @@ class Comportamiento
   end
 
   def recomponer
+    if(self.comportamiento == nil || self.comportamiento.owner !=self.klass)
       self.klass.send(:remove_method,self.metodo)
-
-      puts "#{self.klass}" + "#{self.metodo}"
-      unless (self.klass.instance_methods(false).include?(self.metodo))
-        self.klass.send(:define_method,self.metodo,self.comportamiento)
-      end
+    else
+      self.klass.send(:define_method,self.metodo,self.comportamiento)
+    end
   end
 
 end
