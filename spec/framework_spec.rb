@@ -6,36 +6,6 @@ require_relative '../fixture/fixture_test_framework'
 require_relative '../src/Comportamiento'
 require_relative '../fixture/fixture_test_mock'
 
-describe 'test metaprogramacion del motor' do
-
-  it 'obtengo los test de la clase test' do
-
-    motor = Motor.new MiSuiteDeTests, Test_de_prueba_ser
-
-    esperado1 = [:testear_que_pasa_algo,:testear_que_pasa_otra_cosa]
-    esperado2 = [:testear_que_7_es_igual_a_7,:testear_que_true_es_igual_a_true, :testear_que_7_es_igual_a_9,
-                  :testear_que_hola_es_igual_a_chau, :testear_que_dos_strings_son_iguales]
-    
-    expect(motor.obtener_metodos_de_test MiSuiteDeTests).to eq(esperado1)
-    expect(motor.obtener_metodos_de_test Test_de_prueba_ser).to eq(esperado2)
-  end
-
-  it 'la clase con el test entiende ser' do
-
-    expect(MiSuiteDeTests.instance_methods.include? :ser).to eq(true)
-  end
-
-  it 'la clase con el test entiende mayor_a' do
-
-    expect(MiSuiteDeTests.instance_methods.include? :mayor_a).to eq(true)
-  end
-
-  it 'cargo varios suite y veo que se cargaron todos sus test' do
-    motor = Motor.new Prueba_Test_condiciones, Test_de_prueba_ser
-    expect(motor.lista_de_test_cargados.count).to eq(17)
-  end
-
-end
 
 describe 'test del framework' do
 
@@ -144,7 +114,6 @@ describe 'prueba de tests unitarios' do
 
   it 'falla el deberia ser' do
     lista_resultados = motor.testear Test_de_prueba_ser , :testear_que_7_es_igual_a_9
-
     expect(lista_resultados.first.class).to eq(ResultadoFallo)
   end
 
@@ -227,45 +196,4 @@ describe 'prueba de tests unitarios' do
     lista_resultados = motor.testear Campo_de_explosiones_Test, :testear_que_no_explota_al_entender
     expect(lista_resultados.first.class).to eq(ResultadoFallo)
   end
-end
-
-describe 'test de mocks' do
-
-  motor = Motor.new PersonaHomeTests, Test_mock
-  Motor.enseniar_mockear_a_class
-
-  it 'se define el metodo mockear' do
-    expect(Class.respond_to? :mockear).to eq(true)
-  end
-
-  it 'se reemplaza el metodo mockeado' do
-    PersonalHome.mockear(:todas_las_personas) do [nico,axel,lean] end
-
-    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(true)
-
-    Motor.recomponer_comportamiento_mockeado
-  end
-
-  it 'se quita el metodo mockeado a Motor luego del test'do
-    motor.testear PersonaHomeTests, :testear_que_personas_viejas_trae_solo_a_los_viejos
-    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(false)
-  end
-
-  it 'se pasa el test mockeando' do
-    lista_resultados = motor.testear Test_mock, :testear_que_el_mock_funca
-    expect(lista_resultados.first.class).to eq(ResultadoPaso)
-  end
-
-  it 'se borra el metodo mockear'do
-    Motor.olvidar_mockear_a_class
-    expect(Class.respond_to? :mockear).to eq(false)
-  end
-
-  it 'falla el mockeo porque no esta definido el metodo a mockear' do
-    lista_resultados = motor.testear Test_mock, :testear_que_explota_porque_no_entiende
-    expect(lista_resultados.first.class).to eq(ResultadoPaso)
-
-    # expect{PersonalHome.mockear(:gritar) do 'aaahh' end}.to raise_error(NoMethodError)
-  end
-
 end

@@ -5,7 +5,7 @@ require_relative '../fixture/fixture_test_mock'
 describe 'test de mocks' do
 
   motor = Motor.new PersonaHomeTests, Test_mock
-  Motor.enseniar_mockear_a_class
+  Mock.enseniar_mockear_a_class
 
   it 'se define el metodo mockear' do
     expect(Class.respond_to? :mockear).to eq(true)
@@ -14,14 +14,14 @@ describe 'test de mocks' do
   it 'se reemplaza el metodo mockeado' do
     PersonalHome.mockear(:todas_las_personas) do [nico,axel,lean] end
 
-    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(true)
+    expect(Mock.metodos_mockeados.member?(:todas_las_personas)).to be(true)
 
-    Motor.recomponer_comportamiento_mockeado
+    Mock.recomponer_comportamiento_mockeado
   end
 
   it 'se quita el metodo mockeado a Motor luego del test'do
     motor.testear PersonaHomeTests, :testear_que_personas_viejas_trae_solo_a_los_viejos
-    expect(Motor.metodos_mockeados.member?(:todas_las_personas)).to be(false)
+    expect(Mock.metodos_mockeados.member?(:todas_las_personas)).to be(false)
   end
 
   it 'se pasa el test mockeando' do
@@ -30,7 +30,7 @@ describe 'test de mocks' do
   end
 
   it 'se borra el metodo mockear'do
-    Motor.olvidar_mockear_a_class
+    Mock.olvidar_mockear_a_class
     expect(Class.respond_to? :mockear).to eq(false)
   end
 

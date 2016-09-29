@@ -1,4 +1,3 @@
-# Resultado es lo que devuelve la funcion deberia
 class Resultado
   attr_accessor :resultado_del_equal,:nombre_test,:nombre_test_suite
 
@@ -22,6 +21,7 @@ class Resultado
     self.class == clase
   end
 end
+
 ##########################################################################
 class ResultadoExploto < Resultado
   attr_accessor :clase_error, :mensaje_error
@@ -30,6 +30,7 @@ class ResultadoExploto < Resultado
     puts "#{nombre_test}, con causa #{clase_error} y stack #{mensaje_error}."
   end
 end
+
 ##########################################################################
 class ResultadoFallo < Resultado
   attr_accessor :resultado_esperado, :resultado_obtenido
@@ -38,6 +39,7 @@ class ResultadoFallo < Resultado
     puts "#{self.nombre_test}, se esperaba: #{self.resultado_esperado} y se obtuvo #{self.resultado_obtenido}."
   end
 end
+
 ##########################################################################
 class ResultadoPaso < Resultado
 

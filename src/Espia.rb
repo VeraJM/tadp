@@ -46,4 +46,14 @@ module Espia
       instance_exec &metodo
     }
   end
+
+  def enseniar_espiar_a_suite clase
+    clase.send(:define_method, :espiar, proc {|un_objeto|
+      espia = un_objeto.clone
+      espia.singleton_class.include Espia
+      espia.inicializar
+
+      espia
+    })
+  end
 end
