@@ -25,4 +25,9 @@ module Parser
   def empieza_con(palabra,prefijo)
     palabra.to_s.start_with?(prefijo)
   end
+
+  def tests_de_la_clase_suite(clase_suite)
+    filtrar_metodos_test(clase_suite.instance_methods())
+  end
+
 end

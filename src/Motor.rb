@@ -1,14 +1,12 @@
-require 'set'
-
 require_relative 'Parser'
 require_relative 'Manejo_Resultados'
 require_relative 'Test_tadp'
+require_relative 'suite'
 
 class Motor
   include Parser,
           Manejo_Resultados
 
-  @lista_de_test
   @clases_cargadas
 
   def initialize (*clases_test)
@@ -16,66 +14,51 @@ class Motor
   end
 
   def testear(*args)
-    @lista_de_test = []
 
-    cargar_lista_de_test_a_partir_de_argumentos args
+    suites = generar_suites_a_partir_de_argumentos args
+    ejecutar_suites suites
 
-    ejecutar_tests_cargados
-    mostrar_resultados_de_test_cargados
+    resultados = obtener_resultados_de_suites suites
+    mostrar_resultados resultados
 
-    obtener_resultados_de_tests_cargados
+    resultados
+  end
+
+  def obtener_resultados_de_suites(suites)
+    resultados = []
+    suites.each{|suite| resultados << suite.obtener_resultados_de_tests}
+    resultados.flatten!
+    resultados
+  end
+
+  def crear_suite(clase_suite)
+    tests = tests_de_la_clase_suite(clase_suite).map {|test| Test_tadp.new(clase_suite,test)}
+    Suite.new(tests,clase_suite)
   end
 
   private
-  def esta_cargado? suite
-    @clases_cargadas.any? { |clase_suite| clase_suite == suite}
-  end
-
-  private
-  def mostrar_resultados_de_test_cargados
-    mostrar_resultados @lista_de_test
-  end
-
-  private
-  def crear_y_cargar_objetos_test (suite)
-
-    (filtrar_metodos_test suite.instance_methods).each { |test|
-      @lista_de_test << Test_tadp.new(suite, test)
-    }
-  end
-
-  private
-  def obtener_resultados_de_tests_cargados
-    @resultados_obtenidos = []
-
-    @lista_de_test.each{|test|
-      @resultados_obtenidos << test.resultado if test.te_ejecutaste?
-    }
-
-    @resultados_obtenidos
-  end
-
-  private
-  def cargar_lista_de_test_a_partir_de_argumentos args
+  def generar_suites_a_partir_de_argumentos(args)
+    suites = []
     case
       when args.count == 0
-        @clases_cargadas.each{|suite| crear_y_cargar_objetos_test suite}
+        @clases_cargadas.each{|clase_suite| suites << crear_suite(clase_suite)}
 
-      when args.count == 1 && esta_cargado?(args[0])
-        crear_y_cargar_objetos_test args[0]
+      when args.count == 1
+       suites << crear_suite(args[0])
 
       when args.count > 1
-        suite = args[0]
-        metodos_test = (filtrar_metodos_test args[1..-1]).select{|metodo| suite.new.respond_to? metodo}
-
-        metodos_test.each {|test| @lista_de_test << Test_tadp.new(suite, test)}
+        suite = crear_suite(args[0])
+        # creo la suite, modifico sus test para que solo sean los especificados por parametro
+        metodos_test = (filtrar_metodos_test args[1..-1]).select{|metodo| args[0].new.respond_to? metodo}
+        suite.tests = metodos_test.map {|test| Test_tadp.new(args[0],test) }
+        suites << suite
     end
-
+    suites
   end
 
   private
-  def ejecutar_tests_cargados
-    @lista_de_test.each { |test| test.testear}
+  def ejecutar_suites(suites)
+    suites.each { |suite| suite.testear}
   end
 
 end

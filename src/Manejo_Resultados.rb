@@ -1,29 +1,29 @@
 module Manejo_Resultados
-  def contarResultado(lista_tests,metodo)
-    lista_tests.count {|test| test.resultado.send(metodo)}
+  def contarResultado(resultados,estado)
+    resultados.count {|r| r.send(estado)}
   end
 
-  def mostrar_test(lista_tests,metodo)
-    lista_tests.select {|test| test.resultado.send(metodo)}.each {|test| test.resultado.mostrarse}
+  def mostrar_test(resultados,metodo)
+    resultados.select {|resultado|resultado.send(metodo)}.each {|resultado| resultado.mostrarse}
   end
 
-  def mostrar_resultados(lista_tests)#resultados)
+  def mostrar_resultados(resultados)
 
-    puts "Tests ejecutados: #{lista_tests.count},
-    tests pasados: #{contarResultado(lista_tests,:paso?)},
-    tests fallidos: #{contarResultado(lista_tests,:fallo?)},
-    tests explotados: #{contarResultado(lista_tests,:exploto?)}.\n\n"
+    puts "Tests ejecutados: #{resultados.count},
+    tests pasados: #{contarResultado(resultados,:paso?)},
+    tests fallidos: #{contarResultado(resultados,:fallo?)},
+    tests explotados: #{contarResultado(resultados,:exploto?)}.\n\n"
 
     puts 'Tests pasados:'
-    mostrar_test(lista_tests,:paso?)
+    mostrar_test(resultados,:paso?)
     puts ''
 
     puts 'Tests fallidos:'
-    mostrar_test(lista_tests,:fallo?)
+    mostrar_test(resultados,:fallo?)
     puts ''
 
     puts 'Tests explotados:'
-    mostrar_test(lista_tests,:exploto?)
+    mostrar_test(resultados,:exploto?)
     puts ''
   end
 end
