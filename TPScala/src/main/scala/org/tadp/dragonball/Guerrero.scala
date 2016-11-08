@@ -86,6 +86,34 @@ object DragonBall{
       case SemillaDeErmitanio => (atacante.ki(atacante.kiMaximo),oponente)
     }
   }
+def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
+    atacante.especie match {
+      case Monstruo(_,_) if atacante.ki > oponente.ki =>  atacante.especie.asInstanceOf[Monstruo].comer(atacante, oponente)
+      case _ => (atacante, oponente)
+    }
+  }
+  
+  //##########################################
+  //  FORMAS DE DIGESTION DE LOS MONSTRUOS
+  //##########################################
+  
+  def soloAndroides(monstruo :Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
+    comida.especie match{
+      case Androide => var movimientosDeVictima = comida.habilidades
+                       var movimientosMonstruo = monstruo.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion
+                       var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
+                                                                .movimientos(movimientosMonstruo ++ movimientosDeVictima))
+                       (monstruoLleno, comida)
+      case _ => (monstruo, comida)
+    }
+  }
+  
+  def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
+    var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
+                                                  .movimientos(comida.habilidades))
+                                                  
+    (monstruoLleno, comida)
+  }
 
   sealed trait Estado
   case object Muerto extends Estado
@@ -99,9 +127,20 @@ object DragonBall{
   case class Saiyajin(cola: Boolean = true, transformacion: Option[Transformacion] = None ) extends Especie{
     def cola(sana : Boolean) : Saiyajin = copy(cola = sana)
   }
-  case class Androide(bateria: Int) extends Especie
+  case object Androide extends Especie
   case object Namekusein extends Especie
-  case object Monstruo extends Especie
+  case class Monstruo(formaDigestion: (Guerrero ,Guerrero) => (Guerrero, Guerrero), 
+                      movimientosAprendidosPorDigestion : List[Movimiento]) extends Especie{
+    def comer(atacante : Guerrero, oponente : Guerrero) : (Guerrero, Guerrero) = {
+      var guerreros = this.formaDigestion(atacante, oponente);
+      
+      (guerreros._1, guerreros._2.kiTo(0).estado(Muerto))
+    }
+    
+    def movimientos(nuevosMovimientos :List[Movimiento]) : Especie = {
+      this.copy(movimientosAprendidosPorDigestion = nuevosMovimientos)
+    }
+  }
   
   sealed trait Transformacion
   case class SSJ(nivel: Int) extends Transformacion
