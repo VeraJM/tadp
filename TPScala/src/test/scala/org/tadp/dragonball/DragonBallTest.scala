@@ -13,12 +13,23 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movDejarseFajar = dejarseFajar _
   
   val movimientosGoku : List[Movimiento] = List(movDejarseFajar,movCargarki,movUsarArmaFilosa)
+  val movimientosAndroide15 : List[Movimiento] = List(dejarseFajar)
+  val movimientosAndroide16 : List[Movimiento] = List(usarItem(SemillaDeErmitanio))
+  val movimientosMonstruo : List[Movimiento] = List(comerOponente)
+  
   val itemsGoku : List[Item] = List(SemillaDeErmitanio,ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)
   
   val goku = Guerrero("Goku",Saiyajin(), movimientosGoku, ki=900, kiMaximo=2000,inventario = itemsGoku, Normal)
   val vegeta = Guerrero("Vegeta",Saiyajin(), movimientosGoku, ki=2000, kiMaximo=2000,inventario = itemsGoku, Normal)
   val gohan =  Guerrero("Gohan",Saiyajin(cola=false), movimientosGoku, ki=1000, kiMaximo=2000,inventario = itemsGohan, Normal)
+  val androide15 = Guerrero("Androide 15", Androide,movimientosAndroide15, ki = 100, kiMaximo = 200, inventario = List(), Normal)
+  val androide16 = Guerrero("Androide 16", Androide,movimientosAndroide16, ki = 100, kiMaximo = 200, inventario = List(), Normal)
+  val cell = Guerrero("Cell", Monstruo(soloAndroides, List()),movimientosMonstruo, ki = 1500, kiMaximo = 2000, inventario = List(), Normal)
+  val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()),movimientosMonstruo, ki = 1500, kiMaximo = 2000, inventario = List(), Normal)
+ 
+
+  
   
   "Torneo Artes Marciales" - {
     
@@ -82,6 +93,38 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         nuevoGohan.ki should be (100)
       }
       
+    }
+  }
+  
+   
+  "Pruebas comida" - {
+    
+    "Al comer un guerrero este muere"  in {
+      val peleadores = cell.hacerMovimiento(comerOponente, androide15)
+      
+      peleadores._2.estado should be(Muerto)
+    }
+    
+    "Cell come androides y aprende sus poderes" in {
+      val movimientosAprendidos : List[Movimiento] = movimientosAndroide15 ++ movimientosAndroide16
+      
+      var peleadores = cell.hacerMovimiento(comerOponente, androide15)
+      peleadores = peleadores._1.hacerMovimiento(comerOponente, androide16)
+      
+      peleadores._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAprendidos)
+    }
+    
+    "Cell no puede comer guerreros no androides" in {
+      a [RuntimeException] should be thrownBy {
+      cell.hacerMovimiento(comerOponente, goku)
+      } 
+    }
+    
+    "Majin Buu come todo tipo de guerreros y aprende los poderes solo del ultimo" in {
+      var peleadores = majinBuu.hacerMovimiento(comerOponente, goku)
+      peleadores = peleadores._1.hacerMovimiento(comerOponente, androide15)
+      
+      peleadores._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAndroide15)
     }
   }
 }

@@ -79,7 +79,7 @@ package object dragonBall{
   
   def cargarKi(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     atacante.especie match{
-      case Androide(_) => (atacante,oponente)
+      case Androide => (atacante,oponente)
       case Saiyajin (_,transformacion) => transformacion match {
         case Some(SSJ(nivel)) => (atacante.ki(150*nivel),oponente)
         case _ => (atacante.ki(100),oponente)
@@ -95,7 +95,7 @@ package object dragonBall{
     // La municion seria un atributo en el objeto arma de fuego
     item match{
         case ArmaRoma => oponente.especie match{
-          case Androide(_) => (atacante, oponente)
+          case Androide => (atacante, oponente)
           case _ => if (oponente.ki < 300) (atacante,oponente.estado(Inconsciente)) else (atacante, oponente)
           }
         case ArmaFilosa =>
@@ -144,7 +144,7 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
                        var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
                                                                 .movimientos(movimientosMonstruo ++ movimientosDeVictima))
                        (monstruoLleno, comida)
-      case _ => (monstruo, comida)
+      case _ => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
     }
   }
   
