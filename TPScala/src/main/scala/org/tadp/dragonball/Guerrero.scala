@@ -1,13 +1,14 @@
 package org.tadp.dragonball
 
-object DragonBall{
+package object dragonBall{
   
-  case class Guerrero(especie: Especie,
-    habilidades: List[Movimiento],
-    ki: Int = 0,
-    kiMaximo: Int,
-    inventario: List[Item],
-    estado: Estado = Normal) {
+  case class Guerrero(nombre: String,
+                      especie: Especie,
+                      habilidades: List[Movimiento],
+                      ki: Int = 0,
+                      kiMaximo: Int,
+                      inventario: List[Item],
+                      estado: Estado = Normal) {
   
     /* "SETTERS" */
     def ki (delta: Int) : Guerrero = copy(ki = ki + delta min kiMaximo)
@@ -31,8 +32,47 @@ object DragonBall{
       }
     }
     
+    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) = {
+      val resultados = for {
+        movimiento <- this.habilidades
+        (nuevoAtacante,nuevoOponente) = movimiento(this,oponente)
+        valor = criterio(nuevoAtacante, nuevoOponente)
+      }yield (movimiento,valor)
+      
+      resultados.sortBy(_._2).reverse.head._1
+    }
+    
+    def pelearRound(movimiento: Movimiento)(oponente: Guerrero) = {
+      val (nuevoAtacante,nuevoOponente) = this.hacerMovimiento(movimiento, oponente)
+      turnoOponente(nuevoAtacante,nuevoOponente)
+    }
+    
+    //def planDeAtaqueContra
+    
+  } 
+  //aca termina el guerrero
+  
+  def turnoOponente(atacante: Guerrero, oponente:Guerrero) = {
+    val (nuevoOponente,nuevoAtacante) = 
+      oponente.hacerMovimiento(oponente.movimientoMasEfectivoContra(atacante, diferenciaDeKi), atacante)
+    (nuevoAtacante,nuevoOponente)
   }
   
+  /******** CRITERIOS ***********/
+  
+  def mayorDanioAlEnemigo(atacante: Guerrero, oponente: Guerrero) : Int = {
+    oponente.kiMaximo - oponente.ki
+  }
+  
+  def mayorKi(atacante: Guerrero, oponente: Guerrero) : Int = {
+    atacante.ki
+  }
+  
+  def diferenciaDeKi(atacante: Guerrero, oponente: Guerrero) : Int = {
+    atacante.ki.compare(oponente.ki)
+  }
+ 
+  /************* MOVIMIENTOS ***************/   
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     (atacante, oponente)
   }
@@ -53,23 +93,23 @@ object DragonBall{
     // Queda medio incomodo tener que llevar el conteo de las balas de las armas teniendo que 
     // reflejarlo en la lista de items del atacante que devuelvo.
     // La municion seria un atributo en el objeto arma de fuego
-    // POR AHORA NO SE CONSUME LA MUNICION
     item match{
         case ArmaRoma => oponente.especie match{
           case Androide(_) => (atacante, oponente)
           case _ => if (oponente.ki < 300) (atacante,oponente.estado(Inconsciente)) else (atacante, oponente)
           }
-        case ArmaFilosa => 
+        case ArmaFilosa =>
           val oponenteAtacado = oponente.ki(-1*atacante.ki)
+          
           oponenteAtacado.especie match{
-          case Saiyajin(_,transformacion) => 
-            val nuevoSaiyajin = oponente
-            transformacion match{
-              // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
-              case Some(Mono(_)) => (atacante,oponenteAtacado.estado(Inconsciente).especie(Saiyajin(false,None)))
-              case _ => (atacante, oponenteAtacado.especie(Saiyajin(false,transformacion)).kiTo(1))
-          }
-          case _ => (atacante,oponenteAtacado)
+            case Saiyajin(true,transformacion) =>
+                val nuevoSaiyajin = oponenteAtacado.especie(Saiyajin(cola=false,transformacion)).kiTo(1)
+                transformacion match{
+                  // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
+                  case Some(Mono(anterior)) => (atacante,anterior.especie(Saiyajin(false,None)))
+                  case _ => (atacante, nuevoSaiyajin)
+                  }
+            case _ => (atacante,oponenteAtacado)
         }
         case ArmaDeFuego(municion) => 
           val armaUsada = ArmaDeFuego(municion - 1)
@@ -121,11 +161,12 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
   case object Normal extends Estado
   
   type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
+  type Criterio = (Guerrero,Guerrero) => Int
   
   sealed trait Especie
   case object Humano extends Especie
   case class Saiyajin(cola: Boolean = true, transformacion: Option[Transformacion] = None ) extends Especie{
-    def cola(sana : Boolean) : Saiyajin = copy(cola = sana)
+    def cola(sanidad : Boolean) : Saiyajin = copy(cola = sanidad)
   }
   case object Androide extends Especie
   case object Namekusein extends Especie
