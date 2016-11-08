@@ -1,5 +1,7 @@
 *.class
 *.log
+*.bin
+
 
 # sbt specific
 .cache
@@ -19,3 +21,10 @@ project/plugins/project/
 # ENSIME specific
 .ensime_cache/
 .ensime
+/bin/
+
+
+.cache-*
+.classpath
+.project
+.settings/
