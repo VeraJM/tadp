@@ -257,4 +257,12 @@ package object dragonBall{
   
   case object FotoDeLaLuna extends Item
   
+  
+  //##########################################
+  //        Resultados de pelea
+  //##########################################
+  
+  trait ResultadoPelea
+  case class tenemosUnGanador(ganador :Guerrero) extends ResultadoPelea
+  case class sinGanador(atacante :Guerrero, oponente :Guerrero) extends ResultadoPelea
 }
