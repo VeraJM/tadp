@@ -2,6 +2,10 @@ package org.tadp.dragonball
 
 package object dragonBall{
   
+  //##########################################
+  //               Guerrero
+  //##########################################
+  
   case class Guerrero(nombre: String,
                       especie: Especie,
                       habilidades: List[Movimiento],
@@ -58,7 +62,9 @@ package object dragonBall{
     (nuevoAtacante,nuevoOponente)
   }
   
-  /******** CRITERIOS ***********/
+  //##########################################
+  //      Criterios de movimientos
+  //##########################################
   
   def mayorDanioAlEnemigo(atacante: Guerrero, oponente: Guerrero) : Int = {
     oponente.kiMaximo - oponente.ki
@@ -72,7 +78,9 @@ package object dragonBall{
     atacante.ki.compare(oponente.ki)
   }
  
-  /************* MOVIMIENTOS ***************/   
+  //##########################################
+  //      Movimientos de pelea
+  //##########################################  
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     (atacante, oponente)
   }
@@ -126,11 +134,25 @@ package object dragonBall{
       case SemillaDeErmitanio => (atacante.ki(atacante.kiMaximo),oponente)
     }
   }
-def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
+  
+  def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
     atacante.especie match {
       case Monstruo(_,_) if atacante.ki > oponente.ki =>  atacante.especie.asInstanceOf[Monstruo].comer(atacante, oponente)
       case _ => (atacante, oponente)
     }
+  }
+  
+  def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
+    var atacanteTransformado = atacante.especie match{
+      case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
+      case Saiyajin(_,Some(SSJ(_))) => throw new RuntimeException("El ss no se puede convertir en mono")
+      case Saiyajin(true, _) if atacante.inventario.contains(FotoDeLaLuna) => atacante.kiMaximo(atacante.kiMaximo*3)
+                                                                                      .kiTo(atacante.kiMaximo*3)
+                                                                                      .especie(atacante.especie.asInstanceOf[Saiyajin].transformacion(Mono(atacante)))
+      case _ => atacante
+    }
+    
+    return (atacanteTransformado, oponente)
   }
   
   //##########################################
@@ -154,6 +176,10 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
                                                   
     (monstruoLleno, comida)
   }
+  
+  //##########################################
+  //            Estados
+  //##########################################
 
   sealed trait Estado
   case object Muerto extends Estado
@@ -163,13 +189,25 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
   type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
   type Criterio = (Guerrero,Guerrero) => Int
   
+  
+  //##########################################
+  //              Especies
+  //##########################################
+  
   sealed trait Especie
+
   case object Humano extends Especie
+
   case class Saiyajin(cola: Boolean = true, transformacion: Option[Transformacion] = None ) extends Especie{
     def cola(sanidad : Boolean) : Saiyajin = copy(cola = sanidad)
+    
+    def transformacion(nuevaTransformacion : Transformacion) :Saiyajin = copy(transformacion = Some(nuevaTransformacion))
   }
-  case object Androide extends Especie
-  case object Namekusein extends Especie
+  
+  case object Androide extends Especie;
+
+  case object Namekusein extends Especie;
+  
   case class Monstruo(formaDigestion: (Guerrero ,Guerrero) => (Guerrero, Guerrero), 
                       movimientosAprendidosPorDigestion : List[Movimiento]) extends Especie{
     def comer(atacante : Guerrero, oponente : Guerrero) : (Guerrero, Guerrero) = {
@@ -181,12 +219,20 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
     def movimientos(nuevosMovimientos :List[Movimiento]) : Especie = {
       this.copy(movimientosAprendidosPorDigestion = nuevosMovimientos)
     }
-  }
+  };
+  
+  //##########################################
+  //          Transformaciones
+  //##########################################
   
   sealed trait Transformacion
   case class SSJ(nivel: Int) extends Transformacion
   case class Mono(estadoAnterior: Guerrero) extends Transformacion
   
+  
+  //##########################################
+  //              Items
+  //##########################################
   sealed trait Item
   abstract class Arma() extends Item
   case object SemillaDeErmitanio extends Item
@@ -194,5 +240,7 @@ def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) 
   case object ArmaFilosa extends Arma
   case object ArmaRoma extends Arma
   case class ArmaDeFuego(municion : Int) extends Arma
+  
+  case object FotoDeLaLuna extends Item
   
 }
