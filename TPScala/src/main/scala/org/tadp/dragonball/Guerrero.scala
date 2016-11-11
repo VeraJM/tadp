@@ -21,6 +21,8 @@ package object dragonBall{
     def kiMaximo(nuevoMaximo: Int) : Guerrero = copy (kiMaximo=nuevoMaximo)
     def especie(especie: Especie) : Guerrero = copy (especie=especie)
     
+    def multiplicarKiMaximoEn(valor :Int) :Guerrero = kiMaximo( kiMaximo * valor)
+    
     // Magia para crear la lista de inventario con un item modificado, ej: la arma de fuego con una bala menos
     def item(itemViejo: Item, itemNuevo: Item) : Guerrero = copy(inventario = inventario.updated(inventario.indexOf(itemViejo), itemNuevo))
     
@@ -202,6 +204,59 @@ package object dragonBall{
                                                   
     (monstruoLleno, comida)
   }
+  
+  
+  //-------------------------
+  // MOVIMIENTOS DEL SAIYAJIN
+  //------------------------
+  def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
+   
+    var nuevoGuerrero : Guerrero = atacante
+    atacante.especie match{
+   
+     case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(atacante)  =>
+       
+       transformacion match {
+          //si no tenia, se transforma en nivel 1
+          case None => 
+            nuevoGuerrero = atacante.multiplicarKiMaximoEn(5)
+                                    .especie( Saiyajin(cola, Some(SSJ(1) ) ))
+          
+          case Some(SSJ(nivel)) =>
+            nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
+                                           .especie(Saiyajin(cola,Some(SSJ(nivel+1))))
+         }
+        (nuevoGuerrero , oponente )
+        
+     case _ => (atacante, oponente)
+   }  
+  }
+
+  //retorna si el guerrero(saiyajin) puede avanzar un nivel se SSJ
+  def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = {
+  return saiyajin.ki >= (saiyajin.kiMaximo /2)
+  }
+  
+  
+  //retorna el nivel del saiyajin, si esta en estado normal, es 0
+  def nivelDelSaiyajin(saiyajin :Guerrero):Int = {
+  
+     saiyajin.especie.asInstanceOf[Saiyajin].transformacion match {
+      case Some(SSJ(nivel)) => nivel
+      case None => 0
+    }
+    
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   //##########################################
   //            Estados

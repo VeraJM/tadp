@@ -127,4 +127,72 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       peleadores._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAndroide15)
     }
   }
+  
+  
+   "Pruebas del Saiyajin" - {
+    
+     "Goku no tiene ki suficiente y no se transforma en SSJ" in {
+       //ki de goku = 900 < ki maximo/2 = 100 => no se transforma 
+      val resultado = goku.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+      nivelDelSaiyajin(resultado._1) shouldBe(0)
+      }
+     
+     
+        "Goku se transforma en SSJ y no pierde su cola" in {
+       //ki de goku = 900 < ki maximo/2 = 1000 => no se transforma 
+        val gokuEnojado = goku.kiTo(1500)
+      
+        val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+        resultado._1.especie.asInstanceOf[Saiyajin].cola shouldBe(gokuEnojado.especie.asInstanceOf[Saiyajin].cola)
+      }
+     
+     
+      "Goku se transforma en SSJ y multiplica su ki maximo por 5" in {
+       //ki de goku = 900 < ki maximo/2 = 1000 => no se transforma 
+        val gokuEnojado = goku.kiTo(1500)
+      
+        val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+        resultado._1.kiMaximo shouldBe(10000)
+      }
+    
+     "Goku normal se transforma en SSJ" in {
+       
+      val gokuEnojado = goku.kiTo(1500)
+      
+      val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+      nivelDelSaiyajin(resultado._1) shouldBe(1)
+      }
+    
+      "Goku se transforma en SSJ y no tiene efecto en el rival" in {
+         
+      val resultado = goku.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+      resultado._2 should be(vegeta)
+      }
+      
+      "Goku SSJ1 se transforma en SSJ2" in {
+        
+      val gokuSSJ =  Guerrero("Goku", Saiyajin(false, Some(SSJ(1))),movimientosGoku, 
+                              ki=2000, kiMaximo=2000,inventario = itemsGoku, Normal)
+
+      val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+      nivelDelSaiyajin(resultado._1) shouldBe(2)
+      }
+      
+      "Goku SSJ1 se transforma en SSJ2 y multiplica su nivel en 5 por el nivel" in {
+        
+       val gokuSSJ =  Guerrero("Goku", Saiyajin(false, Some(SSJ(1))),movimientosGoku, 
+                              ki=2000, kiMaximo=100000,inventario = itemsGoku, Normal)
+
+        val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ,vegeta)
+      
+        resultado._1.kiMaximo shouldBe(100000)
+      }
+  }
+
 }
