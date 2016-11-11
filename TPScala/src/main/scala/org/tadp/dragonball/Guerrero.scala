@@ -241,10 +241,7 @@ package object dragonBall{
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = {
   
-     saiyajin.especie.asInstanceOf[Saiyajin].transformacion match {
-      case Some(SSJ(nivel)) => nivel
-      case None => 0
-    }
+     saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
     
   }
 
@@ -283,6 +280,13 @@ package object dragonBall{
     def cola(sanidad : Boolean) : Saiyajin = copy(cola = sanidad)
     
     def transformacion(nuevaTransformacion : Transformacion) :Saiyajin = copy(transformacion = Some(nuevaTransformacion))
+    
+    def nivelSaiyajin :Int = {
+      transformacion match {
+        case Some(SSJ(nivel)) => nivel
+        case None => 0
+      }
+    }
   }
   
   case object Androide extends Especie;
