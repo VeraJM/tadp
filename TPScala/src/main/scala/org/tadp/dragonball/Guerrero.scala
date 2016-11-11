@@ -51,7 +51,22 @@ package object dragonBall{
       turnoOponente(nuevoAtacante,nuevoOponente)
     }
     
-    //def planDeAtaqueContra
+    def planDeAtaqueContra(oponente :Guerrero, cantidadRounds : Int)(criterio :Criterio) :List[Movimiento] = {
+      
+      //si no hay rounds por pelear no se devuelve ningun movimiento
+      if(cantidadRounds < 1) return List()
+      
+      //seleccionar mejor movimiento
+      var mejorMovimiento = this.movimientoMasEfectivoContra(oponente, criterio)
+      var planDeAtaque = List(mejorMovimiento)
+      //simular el round
+      var peleadores = this.pelearRound(mejorMovimiento)(oponente)
+      //volver a repetir con cantidad de rounds - 1 y con los peleadores luego de pelear el round
+      planDeAtaque :: (peleadores._1.planDeAtaqueContra(peleadores._2, cantidadRounds - 1)(criterio))
+      
+      planDeAtaque   
+     }
+ 
     
   } 
   //aca termina el guerrero
@@ -145,7 +160,6 @@ package object dragonBall{
   def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
     var atacanteTransformado = atacante.especie match{
       case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
-      case Saiyajin(_,Some(SSJ(_))) => throw new RuntimeException("El ss no se puede convertir en mono")
       case Saiyajin(true, _) if atacante.inventario.contains(FotoDeLaLuna) => atacante.kiMaximo(atacante.kiMaximo*3)
                                                                                       .kiTo(atacante.kiMaximo*3)
                                                                                       .especie(atacante.especie.asInstanceOf[Saiyajin].transformacion(Mono(atacante)))
