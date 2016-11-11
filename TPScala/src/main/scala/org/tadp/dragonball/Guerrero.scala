@@ -80,9 +80,36 @@ package object dragonBall{
         }
       }
     }
- 
     
+  
+    //cambios de estado    
+    def recuperaKiMaximo :Guerrero = this.kiTo( this.kiMaximo)
+    
+    
+    def morite :Guerrero = this.estado(Muerto)
+    def poneteInconsciente :Guerrero =  this.estado(Inconsciente)
+    def revitalizate :Guerrero = {
+      
+      estado match{
+        case Inconsciente =>
+          this.estado(Normal)
+          
+      }
+    }
+    
+    def perdeSSJ :Guerrero = {
+      
+      this.especie match{
+        case Saiyajin(_, Some(_)) =>
+          val nivel = especie.asInstanceOf[Saiyajin].nivelSaiyajin
+          val kiInicial = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int] 
+      
+          this.kiMaximo(kiInicial)
+      }
+    }
   } 
+
+  
   //aca termina el guerrero
   
   def turnoOponente(atacante: Guerrero, oponente:Guerrero) = {
@@ -132,19 +159,24 @@ package object dragonBall{
     // La municion seria un atributo en el objeto arma de fuego
     item match{
         case ArmaRoma => oponente.especie match{
+          
           case Androide => (atacante, oponente)
           case _ => if (oponente.ki < 300) (atacante,oponente.estado(Inconsciente)) else (atacante, oponente)
+          
           }
         case ArmaFilosa =>
           val oponenteAtacado = oponente.ki(-1*atacante.ki)
           
           oponenteAtacado.especie match{
+            
             case Saiyajin(true,transformacion) =>
                 val nuevoSaiyajin = oponenteAtacado.especie(Saiyajin(cola=false,transformacion)).kiTo(1)
+                
                 transformacion match{
                   // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
                   case Some(Mono(anterior)) => (atacante,anterior.especie(Saiyajin(false,None)))
                   case _ => (atacante, nuevoSaiyajin)
+                  
                   }
             case _ => (atacante,oponenteAtacado)
         }
@@ -172,11 +204,21 @@ package object dragonBall{
   }
   
   def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
+    
     var atacanteTransformado = atacante.especie match{
+      
       case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
-      case Saiyajin(true, _) if atacante.inventario.contains(FotoDeLaLuna) => atacante.kiMaximo(atacante.kiMaximo*3)
-                                                                                      .kiTo(atacante.kiMaximo*3)
-                                                                                      .especie(atacante.especie.asInstanceOf[Saiyajin].transformacion(Mono(atacante)))
+      case Saiyajin(true, estado) if atacante.inventario.contains(FotoDeLaLuna) =>
+        
+        estado match { //TODO este choclo se podria separar
+          case Some(_) =>atacante.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(atacante.especie.asInstanceOf[Saiyajin]
+                                .transformacion(Mono(atacante)))
+          
+          case None =>  atacante.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(atacante.especie.asInstanceOf[Saiyajin]
+                                .transformacion(Mono(atacante)))
+        }
       case _ => atacante
     }
     
@@ -213,48 +255,31 @@ package object dragonBall{
    
     var nuevoGuerrero : Guerrero = atacante
     atacante.especie match{
-   
-     case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(atacante)  =>
-       
-       transformacion match {
+         
+      case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(atacante)  =>
+        
+        transformacion match {
           //si no tenia, se transforma en nivel 1
           case None => 
             nuevoGuerrero = atacante.multiplicarKiMaximoEn(5)
                                     .especie( Saiyajin(cola, Some(SSJ(1) ) ))
           
           case Some(SSJ(nivel)) =>
-            nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
-                                           .especie(Saiyajin(cola,Some(SSJ(nivel+1))))
+            // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
+            nuevoGuerrero = atacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
          }
         (nuevoGuerrero , oponente )
         
      case _ => (atacante, oponente)
-   }  
-  }
+    }  
+  } 
 
   //retorna si el guerrero(saiyajin) puede avanzar un nivel se SSJ
-  def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = {
-  return saiyajin.ki >= (saiyajin.kiMaximo /2)
-  }
-  
+  def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = saiyajin.ki >= (saiyajin.kiMaximo /2)
   
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
-  def nivelDelSaiyajin(saiyajin :Guerrero):Int = {
-  
-     saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
-    
-  }
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
+     
   //##########################################
   //            Estados
   //##########################################
@@ -267,6 +292,8 @@ package object dragonBall{
   type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
   type Criterio = (Guerrero,Guerrero) => Int
   
+  type Ataque = Movimiento
+  
   
   //##########################################
   //              Especies
@@ -276,7 +303,9 @@ package object dragonBall{
 
   case object Humano extends Especie
 
-  case class Saiyajin(cola: Boolean = true, transformacion: Option[Transformacion] = None ) extends Especie{
+  case class Saiyajin(cola: Boolean = true, transformacion: Option[Transformacion] = None) extends Especie{
+    //def kiMaximoInicial(nuevoMaximo: Int) : Guerrero = copy (kiMaximoInicial=nuevoMaximo)
+    
     def cola(sanidad : Boolean) : Saiyajin = copy(cola = sanidad)
     
     def transformacion(nuevaTransformacion : Transformacion) :Saiyajin = copy(transformacion = Some(nuevaTransformacion))
@@ -287,6 +316,7 @@ package object dragonBall{
         case None => 0
       }
     }
+    
   }
   
   case object Androide extends Especie;

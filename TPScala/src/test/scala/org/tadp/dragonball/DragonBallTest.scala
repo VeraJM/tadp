@@ -176,9 +176,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       
       "Goku SSJ1 se transforma en SSJ2" in {
         
-      val gokuSSJ =  Guerrero("Goku", Saiyajin(false, Some(SSJ(1))),movimientosGoku, 
-                              ki=2000, kiMaximo=2000,inventario = itemsGoku, Normal)
-
+      val gokuSSJ = goku.especie( Saiyajin(false, Some(SSJ(1)))).kiMaximo(2000).ki(2000)
       val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ,vegeta)
       
       nivelDelSaiyajin(resultado._1) shouldBe(2)
@@ -186,13 +184,49 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       
       "Goku SSJ1 se transforma en SSJ2 y multiplica su nivel en 5 por el nivel" in {
         
-       val gokuSSJ =  Guerrero("Goku", Saiyajin(false, Some(SSJ(1))),movimientosGoku, 
-                              ki=2000, kiMaximo=100000,inventario = itemsGoku, Normal)
+       val gokuSSJ =  goku.especie( Saiyajin(false, Some(SSJ(1)))).kiMaximo(10000).ki(7000)
 
         val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ,vegeta)
       
-        resultado._1.kiMaximo shouldBe(100000)
+        resultado._1.kiMaximo shouldBe(50000)
       }
+      
+      
+       "Goku SSJ pierde su estado y recupera su ki maximo inicial" in {
+        
+       val gokuSSJ =  goku.especie( Saiyajin(false, Some(SSJ(1)))).kiMaximo(10000)
+        val resultado = gokuSSJ.perdeSSJ
+      
+        resultado.kiMaximo shouldBe(2000)
+      }
+       
+       
+        "Goku SSJ2 se destransforma y recupera su ki maximo inicial" in {
+        
+        val gokuSSJ2 =  goku.especie( Saiyajin(false, Some(SSJ(2)))).kiMaximo(50000)
+
+        val resultado = gokuSSJ2.perdeSSJ
+      
+        resultado.kiMaximo shouldBe(2000)
+      }
+        
+        
+        "Goku SSJ se transforma en mono y pierde estado ssj" in {
+          //ki max goku 2000 => ki max en mono = 6000
+           val otrosItems : List[Item] = List(SemillaDeErmitanio,ArmaFilosa, FotoDeLaLuna)
+           
+            val gokuSSJ = Guerrero("Goku",Saiyajin(true, Some(SSJ(1))),
+                                      movimientosGoku, ki=7000,
+                                      kiMaximo=10000,
+                                      inventario = otrosItems, Normal)
+          
+           val resultado = gokuSSJ.hacerMovimiento(convertirseEnMono,vegeta)
+
+          resultado._1.kiMaximo shouldBe(6000)
+           
+           
+       }
+        
   }
 
 }
