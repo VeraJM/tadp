@@ -294,7 +294,7 @@ package object dragonBall{
   def golpeNinjaNormal(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
     if(atacante.ki > oponente.ki)
           {
-            (atacante,oponente.ki(-20)
+            (atacante,oponente.ki(-20))
           } else
           {
             (atacante.ki(-20),oponente)
@@ -316,6 +316,7 @@ package object dragonBall{
         }
         atacante.kiTo(0)
         atacante.morite
+       (atacante,oponente)
       case _ => (atacante,oponente)
     }
   }
