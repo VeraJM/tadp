@@ -279,7 +279,47 @@ package object dragonBall{
   
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
-     
+   
+  def muchosGolpesNinja(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
+    atacante.especie match{
+      case Humano => 
+        oponente.especie match {
+          case Androide => (atacante.ki(-10),oponente)
+          case _ => golpeNinjaNormal(atacante,oponente)
+          }
+      case _ =>  golpeNinjaNormal(atacante,oponente)
+    }
+  }
+
+  def golpeNinjaNormal(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+    if(atacante.ki > oponente.ki)
+          {
+            (atacante,oponente.ki(-20)
+          } else
+          {
+            (atacante.ki(-20),oponente)
+          }
+  }
+  
+  def explotar(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+    atacante.especie match{
+      case Androide | Monstruo => 
+        oponente.especie match {
+          case Androide => 
+            oponente.ki(atacante.ki * -3)
+          case Namekusein => oponente.ki(atacante.ki * -2)
+          if (oponente.ki == 0)
+          {
+            oponente.ki(1)
+          }
+          case _ => oponente.ki(atacante.ki * -2)
+        }
+        atacante.kiTo(0)
+        atacante.morite
+      case _ => (atacante,oponente)
+    }
+  }
+  }
   //##########################################
   //            Estados
   //##########################################
