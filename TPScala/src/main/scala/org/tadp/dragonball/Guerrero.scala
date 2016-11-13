@@ -247,10 +247,10 @@ package object dragonBall{
     (monstruoLleno, comida)
   }
   
+  //##########################################
+  //  MOVIMIENTOS DEL SAIYAJIN
+  //##########################################
   
-  //-------------------------
-  // MOVIMIENTOS DEL SAIYAJIN
-  //------------------------
   def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
    
     var nuevoGuerrero : Guerrero = atacante
@@ -280,6 +280,11 @@ package object dragonBall{
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
    
+
+  //##########################################
+  //              ATAQUES
+  //##########################################
+  
   def muchosGolpesNinja(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     atacante.especie match{
       case Humano => 
@@ -303,7 +308,7 @@ package object dragonBall{
   
   def explotar(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
     atacante.especie match{
-      case Androide | Monstruo => 
+      case Androide | Monstruo(_,_) => 
         oponente.especie match {
           case Androide => 
             oponente.ki(atacante.ki * -3)
@@ -320,7 +325,25 @@ package object dragonBall{
       case _ => (atacante,oponente)
     }
   }
+  
+  def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+    
+     if (atacante.ki >= kiRequerido){ 
+       
+        oponente.especie match {
+          case Monstruo(_,_) => ( atacante.ki(-kiRequerido) ,oponente.ki(-kiRequerido/2) )
+          case _ => ( atacante.ki(-kiRequerido) ,  oponente.ki(- 2 * kiRequerido) )
+        }    
+        
+    }else{
+    
+      (atacante, oponente)
+    }
   }
+  
+  
+  case class Ataque(nombre :String, kiRequerido :Int) 
+  
   //##########################################
   //            Estados
   //##########################################
@@ -332,9 +355,7 @@ package object dragonBall{
   
   type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
   type Criterio = (Guerrero,Guerrero) => Int
-  
-  type Ataque = Movimiento
-  
+    
   
   //##########################################
   //              Especies

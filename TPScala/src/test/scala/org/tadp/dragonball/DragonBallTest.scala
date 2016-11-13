@@ -29,7 +29,9 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()),movimientosMonstruo, ki = 1500, kiMaximo = 2000, inventario = List(), Normal)
  
 
-  
+  val kamehameha = ondaDeEnergia(400) _
+  val bigBang = ondaDeEnergia(300) _
+  val masenko = ondaDeEnergia(200) _
   
   "Torneo Artes Marciales" - {
     
@@ -45,6 +47,31 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         val (nuevoGoku,nuevoVegeta) = goku.hacerMovimiento(cargarKi, vegeta)
         nuevoGoku.ki should be(1000)
       }
+      
+      "El androide no sube su ki cuando lo intenta" in {        
+        val resultado = androide16.hacerMovimiento(cargarKi,cell)
+        resultado._1.ki shouldBe (androide16.ki)
+      }
+      
+        "Gohan lanza energia y su ki disminuye" in {
+         
+        val resultado = gohan.hacerMovimiento(masenko,goku)
+        resultado._1.ki shouldBe (800)
+       }
+      
+       "Vegeta le lanza energia a Goku y le saca el doble" in {
+         
+        val resultado = vegeta.hacerMovimiento(bigBang,goku)
+        resultado._2.ki shouldBe (300)
+       }
+      
+      
+      "Goku le lanza energia a majin bu y solo le saca la mitad" in {
+        
+        val resultado = goku.hacerMovimiento(kamehameha,majinBuu)
+         resultado._2.ki shouldBe (1300)
+      }
+      
     }
     
     "Mejores movimientos" - {
