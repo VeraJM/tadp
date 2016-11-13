@@ -328,17 +328,18 @@ package object dragonBall{
   
   def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
     
-     if (atacante.ki >= kiRequerido){ 
-       
-        oponente.especie match {
-          case Monstruo(_,_) => ( atacante.ki(-kiRequerido) ,oponente.ki(-kiRequerido/2) )
-          case _ => ( atacante.ki(-kiRequerido) ,  oponente.ki(- 2 * kiRequerido) )
-        }    
-        
-    }else{
+    var atacanteNuevo = atacante
+    var oponenteNuevo = oponente
     
-      (atacante, oponente)
+     if (atacante.ki >= kiRequerido){ 
+        atacanteNuevo = atacante.ki(-kiRequerido) 
+        
+        oponente.especie match {
+          case Monstruo(_,_) => oponenteNuevo =  oponente.ki(-kiRequerido/2) 
+          case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
+        }    
     }
+    return (atacanteNuevo, oponenteNuevo)
   }
   
   
