@@ -70,7 +70,8 @@ package object dragonBall{
      }
     
     def pelearContra(oponente :Guerrero)(planDeAtaque : List[Movimiento]) : ResultadoPelea = {
-      val estadoFinalPeleadores : (Guerrero, Guerrero) = null //TODO aca hay q ejecutar el plan de pelea y obtener los peleadores finales
+      val estadoFinalPeleadores : (Guerrero, Guerrero) =  planDeAtaque.foldLeft((this, oponente))({(peleadores :(Guerrero,Guerrero), mov :Movimiento) => 
+                                                                                                      mov(peleadores._1, peleadores._2)})
       
       estadoFinalPeleadores._1.estado match{
         case Muerto => tenemosUnGanador(estadoFinalPeleadores._2)
