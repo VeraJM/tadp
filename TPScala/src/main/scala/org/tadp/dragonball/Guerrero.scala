@@ -14,6 +14,8 @@ package object dragonBall{
                       inventario: List[Item],
                       estado: Estado = Normal) {
   
+    var potenciadorGenkidama = 0
+    
     /* "SETTERS" */
     def ki (delta: Int) : Guerrero = copy(ki = ki + delta min kiMaximo)
     def kiTo(value: Int) : Guerrero = copy(ki=value)
@@ -87,8 +89,14 @@ package object dragonBall{
     def recuperaKiMaximo :Guerrero = this.kiTo( this.kiMaximo)
     
     
-    def morite :Guerrero = this.estado(Muerto)
-    def poneteInconsciente :Guerrero =  this.estado(Inconsciente)
+    def morite :Guerrero = {
+      this.potenciadorGenkidama = 0
+      this.estado(Muerto)
+    }
+    def poneteInconsciente :Guerrero =  {
+      this.potenciadorGenkidama = 0
+      this.estado(Inconsciente)
+    }
     def revitalizate :Guerrero = {
       
       estado match{
@@ -139,6 +147,7 @@ package object dragonBall{
   //      Movimientos de pelea
   //##########################################  
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
+    atacante.potenciadorGenkidama += 1
     (atacante, oponente)
   }
   
@@ -328,7 +337,6 @@ package object dragonBall{
   }
   
   def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    
     var atacanteNuevo = atacante
     var oponenteNuevo = oponente
     
@@ -340,9 +348,21 @@ package object dragonBall{
           case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
         }    
     }
+    atacanteNuevo.potenciadorGenkidama = 0
     return (atacanteNuevo, oponenteNuevo)
   }
   
+  def genkidama(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+    
+    var atacanteNuevo = atacante
+    var oponenteNuevo = oponente
+    
+    atacanteNuevo.potenciadorGenkidama = 0
+    
+    oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
+    
+    (atacanteNuevo, oponenteNuevo)
+  }
   
   case class Ataque(nombre :String, kiRequerido :Int) 
   
