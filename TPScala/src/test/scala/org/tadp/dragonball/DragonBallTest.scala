@@ -324,7 +324,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val resultado = gokuSSJ2.perdeSSJ
 
       resultado.kiMaximo shouldBe (2000)
-    }
+     }
 
     "Goku SSJ se transforma en mono y pierde estado ssj" in {
       //ki max goku 2000 => ki max en mono = 6000
@@ -339,7 +339,17 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       resultado._1.kiMaximo shouldBe (6000)
 
-    }
+      }
+    
+      "Goku SSJ se vuelve inconsciente y pierde su estado" in {
+
+        val gokuSSJ = Guerrero("Goku", Saiyajin(false, Some(SSJ(1))),
+                                movimientosGoku, ki = 7000,potenciadorGenkidama = 0,
+                                kiMaximo = 10000,
+                                inventario = itemsGoku, Normal)
+
+       nivelDelSaiyajin(gokuSSJ.poneteInconsciente) shouldBe (0)
+      }
 
   }
 

@@ -96,7 +96,12 @@ package object dragonBall{
     }
     def poneteInconsciente :Guerrero =  {
       val nuevoGuerrero : Guerrero = this.perderPotenciador
-      nuevoGuerrero.estado(Inconsciente)
+      
+      this.especie match {
+        case Saiyajin(_,_) => nuevoGuerrero.perdeSSJ.estado(Inconsciente)
+        case _ => nuevoGuerrero.estado(Inconsciente)
+      }
+      
     }
     def revitalizate :Guerrero = {
       
@@ -111,11 +116,11 @@ package object dragonBall{
     def perdeSSJ :Guerrero = {
       
       this.especie match{
-        case Saiyajin(_, Some(_)) =>
+        case Saiyajin(cola, Some(_)) =>
           val nivel = especie.asInstanceOf[Saiyajin].nivelSaiyajin
           val kiInicial = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int] 
       
-          this.kiMaximo(kiInicial)
+          this.kiMaximo(kiInicial).especie(Saiyajin(cola, None))
         case _ => this
       }
     }
@@ -176,7 +181,8 @@ package object dragonBall{
         case ArmaRoma => oponente.especie match{
           
           case Androide => (atacanteSinPotenciador, oponente)
-          case _ => if (oponente.ki < 300) (atacanteSinPotenciador,oponente.estado(Inconsciente)) else (atacanteSinPotenciador, oponente)
+          case _ => if (oponente.ki < 300) (atacanteSinPotenciador,oponente.estado(Inconsciente))
+                    else (atacanteSinPotenciador, oponente)
           
           }
         case ArmaFilosa =>
