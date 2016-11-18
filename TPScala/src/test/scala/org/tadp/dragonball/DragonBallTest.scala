@@ -8,6 +8,7 @@ import org.tadp.dragonball.dragonBall._
 
 class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
+  //MOVIMIENTOS
   val movUsarArmaFilosa = usarItem(ArmaFilosa) _
   val movCargarki = cargarKi _
   val movDejarseFajar = dejarseFajar _
@@ -19,9 +20,26 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
   val movimientosNamekusein: List[Movimiento] = List(muchosGolpesNinja)
   
+  val kamehameha = ondaDeEnergia(400) _
+  val bigBang = ondaDeEnergia(300) _
+  val masenko = ondaDeEnergia(200) _
+    
+  val curarse :Pase = (atacante,oponente) => (atacante.recuperaKiMaximo, oponente)
+  val curaOponente :Pase = (atacante,oponente) => (atacante, oponente.recuperaKiMaximo)
+  
+  // Otra opcion es: 
+  /* val curarse = magia((atacante,oponente) => (atacante.recuperaKiMaximo, oponente)) _
+   * val curaOponente = magia((atacante,oponente) => (atacante, oponente.recuperaKiMaximo))_
+   * 
+   * y utilizar asi: atacante.hacerMovimiento(curarese, oponente)
+   * */
+    
+  //LISTA DE ITEMS
   val itemsGoku: List[Item] = List(SemillaDeErmitanio, ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)
-
+  val sieteEsferas: List[Item] = List.fill(7)(EsferaDragon)
+  
+  //GUERREROS
   val goku = Guerrero("Goku", Saiyajin(), movimientosGoku, ki = 900,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
   val vegeta = Guerrero("Vegeta", Saiyajin(), movimientosGoku, ki = 2000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
   val gohan = Guerrero("Gohan", Saiyajin(cola = false), movimientosGoku, ki = 1000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGohan, Normal)
@@ -31,10 +49,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val mrSatan = Guerrero("Satan", Humano, movimientosHumano, ki = 80,potenciadorGenkidama = 0, kiMaximo = 250, inventario = List(), Normal)
   val piccoro = Guerrero("Piccoro", Namekusein, movimientosNamekusein, ki = 600,potenciadorGenkidama = 0, kiMaximo = 1300, inventario = List(), Normal)
-
-  val kamehameha = ondaDeEnergia(400) _
-  val bigBang = ondaDeEnergia(300) _
-  val masenko = ondaDeEnergia(200) _
+  val krilin = Guerrero("Krilin", Humano, movimientosHumano, ki = 250, potenciadorGenkidama = 0, kiMaximo = 900, inventario = sieteEsferas, Normal)
+  
 
   "Torneo Artes Marciales" - {
 
@@ -84,7 +100,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         resultadoGenkidama._2.ki shouldBe (vegeta.ki - 100)
       }
 
-      "Goku cargar genkidama y la reinicia al usar kamehameja" in {
+      "Goku carga genkidama y la reinicia al usar kamehameha" in {
 
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
         val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
@@ -93,7 +109,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         despuesDeKamehameja._1.potenciadorGenkidama shouldBe (0)
       }
 
-      "Goku cargar genkidama y la reinicia al quedar inconciente" in {
+      "Goku carga genkidama y la reinicia al quedar inconciente" in {
 
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
         val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
@@ -167,6 +183,44 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
         atacar._2.ki shouldBe (1500)
       }
+      
+      "Majin Bu se cura usando un pase de magia" in {
+        
+        val resultado = majinBuu.hacerMovimiento(magia(curarse), goku)
+        
+        resultado._1.ki shouldBe(2000)
+        
+      }
+      
+      "Piccoro cura al otro usando un pase de magia" in {
+        
+        val resultado = majinBuu.hacerMovimiento(magia(curaOponente), gohan)
+        
+        resultado._2.ki shouldBe(2000)        
+      }
+      
+      "Mr Satan realiza un pase pero no pasa nada  por no tener las esferas del dragon" in{
+        val resultado = mrSatan.hacerMovimiento(magia(curarse), majinBuu)
+        
+        resultado._1.ki shouldBe(80) 
+      }
+      
+      
+       "Krilin restaura su ki al pedir un deseo con las esferas del dragon" in{
+      
+        val resultado = krilin.hacerMovimiento(magia(curarse), majinBuu)
+        
+        resultado._1.ki shouldBe(900) 
+      }
+       
+       "Krilin pide un deseo y pierde las esferas del dragon" in{
+      
+        val resultado = krilin.hacerMovimiento(magia(curarse), majinBuu)
+        
+        tieneEsferasDelDragon(resultado._1) shouldBe(false)
+      }
+       
+       
     }
 
     "Mejores movimientos" - {

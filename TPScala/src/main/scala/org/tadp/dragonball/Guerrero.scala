@@ -23,6 +23,7 @@ package object dragonBall{
     def especie(especie: Especie) : Guerrero = copy (especie=especie)
     def aumentarPotenciador : Guerrero = copy(potenciadorGenkidama = potenciadorGenkidama + 1)
     def perderPotenciador : Guerrero = copy(potenciadorGenkidama = 0)
+    def inventario(nuevaLista: List[Item]) :Guerrero = copy(inventario = nuevaLista)
     
     def multiplicarKiMaximoEn(valor :Int) :Guerrero = kiMaximo( kiMaximo * valor)
     
@@ -308,6 +309,35 @@ package object dragonBall{
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
    
+  //##########################################
+  //              MAGIA
+  //##########################################
+  
+  type Pase = (Guerrero,Guerrero) => (Guerrero,Guerrero)
+  def magia(pase :Pase)(atacante :Guerrero, oponente :Guerrero): (Guerrero,Guerrero) = {
+    
+    val nuevoAtacante : Guerrero = atacante.perderPotenciador
+    
+     atacante.especie match {      
+      case Namekusein | Monstruo(_,_) => pase(nuevoAtacante,oponente)
+      case _  => if (tieneEsferasDelDragon(nuevoAtacante)){  
+        
+                      pase(perderEsferasDelDragon(nuevoAtacante),oponente)
+                  }
+                  else {(nuevoAtacante, oponente)}
+    }
+  } 
+  
+  def tieneEsferasDelDragon(guerrero: Guerrero) :Boolean = {
+    guerrero.inventario.count(e => e.equals(EsferaDragon)).equals(7)
+  }
+  
+  def perderEsferasDelDragon(guerrero :Guerrero) :Guerrero = {
+    val lista = guerrero.inventario.filter(e => ! e.equals(EsferaDragon))
+    
+    guerrero.inventario(lista)
+  }
+  
 
   //##########################################
   //              ATAQUES
@@ -460,6 +490,7 @@ package object dragonBall{
   case class ArmaDeFuego(municion : Int) extends Arma
   
   case object FotoDeLaLuna extends Item
+  case object EsferaDragon extends Item
   
   
   //##########################################
