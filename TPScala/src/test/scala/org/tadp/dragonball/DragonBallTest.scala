@@ -16,7 +16,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
   val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio))
   val movimientosMonstruo: List[Movimiento] = List(comerOponente)
-
+  val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
+  
   val itemsGoku: List[Item] = List(SemillaDeErmitanio, ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)
 
@@ -27,7 +28,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val androide16 = Guerrero("Androide 16", Androide, movimientosAndroide16, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
   val cell = Guerrero("Cell", Monstruo(soloAndroides, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
-
+  val mrSatan = Guerrero("Satan", Humano, movimientosHumano, ki = 80,potenciadorGenkidama = 0, kiMaximo = 250, inventario = List(), Normal)
+  
   val kamehameha = ondaDeEnergia(400) _
   val bigBang = ondaDeEnergia(300) _
   val masenko = ondaDeEnergia(200) _
@@ -98,7 +100,27 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
         gokuInconsciente.potenciadorGenkidama shouldBe (0)
       }
+      
+       "Mr Satan hace muchos golpes ninja contra androide16 y pierde 10 puntos por ser Humano vs Androide" in {
 
+        val atacar = mrSatan.hacerMovimiento(muchosGolpesNinja, androide16)
+
+        atacar._1.ki shouldBe (70)
+      }
+
+        "Goku hace muchos golpes ninja contra Cell y pierde 20 de ki por tener menos ki" in {
+
+        val atacar = goku.hacerMovimiento(muchosGolpesNinja, cell)
+
+        atacar._1.ki shouldBe (880)
+      }
+        
+      "Vegeta hace muchos golpes ninja contra Cell y Cell pierde 20 de ki por tener menos ki" in {
+
+        val atacar = vegeta.hacerMovimiento(muchosGolpesNinja, cell)
+
+        atacar._2.ki shouldBe (1480)
+      }
     }
 
     "Mejores movimientos" - {
