@@ -20,13 +20,13 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val itemsGoku: List[Item] = List(SemillaDeErmitanio, ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)
 
-  val goku = Guerrero("Goku", Saiyajin(), movimientosGoku, ki = 900, kiMaximo = 2000, inventario = itemsGoku, Normal)
-  val vegeta = Guerrero("Vegeta", Saiyajin(), movimientosGoku, ki = 2000, kiMaximo = 2000, inventario = itemsGoku, Normal)
-  val gohan = Guerrero("Gohan", Saiyajin(cola = false), movimientosGoku, ki = 1000, kiMaximo = 2000, inventario = itemsGohan, Normal)
-  val androide15 = Guerrero("Androide 15", Androide, movimientosAndroide15, ki = 100, kiMaximo = 200, inventario = List(), Normal)
-  val androide16 = Guerrero("Androide 16", Androide, movimientosAndroide16, ki = 100, kiMaximo = 200, inventario = List(), Normal)
-  val cell = Guerrero("Cell", Monstruo(soloAndroides, List()), movimientosMonstruo, ki = 1500, kiMaximo = 2000, inventario = List(), Normal)
-  val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500, kiMaximo = 2000, inventario = List(), Normal)
+  val goku = Guerrero("Goku", Saiyajin(), movimientosGoku, ki = 900,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
+  val vegeta = Guerrero("Vegeta", Saiyajin(), movimientosGoku, ki = 2000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
+  val gohan = Guerrero("Gohan", Saiyajin(cola = false), movimientosGoku, ki = 1000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGohan, Normal)
+  val androide15 = Guerrero("Androide 15", Androide, movimientosAndroide15, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
+  val androide16 = Guerrero("Androide 16", Androide, movimientosAndroide16, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
+  val cell = Guerrero("Cell", Monstruo(soloAndroides, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
+  val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
 
   val kamehameha = ondaDeEnergia(400) _
   val bigBang = ondaDeEnergia(300) _
@@ -263,7 +263,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val otrosItems: List[Item] = List(SemillaDeErmitanio, ArmaFilosa, FotoDeLaLuna)
 
       val gokuSSJ = Guerrero("Goku", Saiyajin(true, Some(SSJ(1))),
-        movimientosGoku, ki = 7000,
+        movimientosGoku, ki = 7000,potenciadorGenkidama = 0,
         kiMaximo = 10000,
         inventario = otrosItems, Normal)
 
