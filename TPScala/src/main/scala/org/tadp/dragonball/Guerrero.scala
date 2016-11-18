@@ -91,11 +91,11 @@ package object dragonBall{
     
     
     def morite :Guerrero = {
-      var nuevoGuerrero : Guerrero = this.perderPotenciador
+      val nuevoGuerrero : Guerrero = this.perderPotenciador
       nuevoGuerrero.estado(Muerto)
     }
     def poneteInconsciente :Guerrero =  {
-      var nuevoGuerrero : Guerrero = this.perderPotenciador
+      val nuevoGuerrero : Guerrero = this.perderPotenciador
       nuevoGuerrero.estado(Inconsciente)
     }
     def revitalizate :Guerrero = {
@@ -148,7 +148,7 @@ package object dragonBall{
   //      Movimientos de pelea
   //##########################################  
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    val atacanteNuevo : Guerrero =  atacante.aumentarPotenciador
+    val atacanteNuevo =  atacante.aumentarPotenciador
     (atacanteNuevo, oponente)
   }
   
@@ -355,7 +355,7 @@ package object dragonBall{
           case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
         }    
     }
-    var atacanteSinPotenciador = atacanteNuevo.perderPotenciador
+    val atacanteSinPotenciador = atacanteNuevo.perderPotenciador
     (atacanteSinPotenciador, oponenteNuevo)
   }
   

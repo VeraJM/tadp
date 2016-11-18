@@ -94,9 +94,9 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
         val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
         
-        dejarse2._1.poneteInconsciente
+        val gokuInconsciente = dejarse2._1.poneteInconsciente
 
-        dejarse2._1.potenciadorGenkidama shouldBe (0)
+        gokuInconsciente.potenciadorGenkidama shouldBe (0)
       }
 
     }
