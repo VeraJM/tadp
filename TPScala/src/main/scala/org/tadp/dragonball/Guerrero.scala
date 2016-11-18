@@ -21,7 +21,7 @@ package object dragonBall{
     def estado(nuevoEstado: Estado) : Guerrero = copy (estado=nuevoEstado)
     def kiMaximo(nuevoMaximo: Int) : Guerrero = copy (kiMaximo=nuevoMaximo)
     def especie(especie: Especie) : Guerrero = copy (especie=especie)
-    def aumentarPotenciador : Guerrero = copy(potenciadorGenkidama = this.potenciadorGenkidama + 1)
+    def aumentarPotenciador : Guerrero = copy(potenciadorGenkidama = potenciadorGenkidama + 1)
     def perderPotenciador : Guerrero = copy(potenciadorGenkidama = 0)
     
     def multiplicarKiMaximoEn(valor :Int) :Guerrero = kiMaximo( kiMaximo * valor)
@@ -91,12 +91,12 @@ package object dragonBall{
     
     
     def morite :Guerrero = {
-      this.perderPotenciador
-      this.estado(Muerto)
+      var nuevoGuerrero : Guerrero = this.perderPotenciador
+      nuevoGuerrero.estado(Muerto)
     }
     def poneteInconsciente :Guerrero =  {
-      this.perderPotenciador
-      this.estado(Inconsciente)
+      var nuevoGuerrero : Guerrero = this.perderPotenciador
+      nuevoGuerrero.estado(Inconsciente)
     }
     def revitalizate :Guerrero = {
       
@@ -148,19 +148,19 @@ package object dragonBall{
   //      Movimientos de pelea
   //##########################################  
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    atacante.aumentarPotenciador
-    (atacante, oponente)
+    val atacanteNuevo : Guerrero =  atacante.aumentarPotenciador
+    (atacanteNuevo, oponente)
   }
   
   def cargarKi(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    atacante.perderPotenciador
+    val atacanteNuevo : Guerrero = atacante.perderPotenciador
     atacante.especie match{
-      case Androide => (atacante,oponente)
+      case Androide => (atacanteNuevo,oponente)
       case Saiyajin (_,transformacion) => transformacion match {
-        case Some(SSJ(nivel)) => (atacante.ki(150*nivel),oponente)
-        case _ => (atacante.ki(100),oponente)
+        case Some(SSJ(nivel)) => (atacanteNuevo.ki(150*nivel),oponente)
+        case _ => (atacanteNuevo.ki(100),oponente)
       }
-      case _ => (atacante.ki(100),oponente)
+      case _ => (atacanteNuevo.ki(100),oponente)
     }
   }
   
@@ -169,16 +169,16 @@ package object dragonBall{
     // Queda medio incomodo tener que llevar el conteo de las balas de las armas teniendo que 
     // reflejarlo en la lista de items del atacante que devuelvo.
     // La municion seria un atributo en el objeto arma de fuego
-    atacante.perderPotenciador
+    val atacanteSinPotenciador : Guerrero = atacante.perderPotenciador
     item match{
         case ArmaRoma => oponente.especie match{
           
-          case Androide => (atacante, oponente)
-          case _ => if (oponente.ki < 300) (atacante,oponente.estado(Inconsciente)) else (atacante, oponente)
+          case Androide => (atacanteSinPotenciador, oponente)
+          case _ => if (oponente.ki < 300) (atacanteSinPotenciador,oponente.estado(Inconsciente)) else (atacanteSinPotenciador, oponente)
           
           }
         case ArmaFilosa =>
-          val oponenteAtacado = oponente.ki(-1*atacante.ki)
+          val oponenteAtacado = oponente.ki(-1*atacanteSinPotenciador.ki)
           
           oponenteAtacado.especie match{
             
@@ -187,15 +187,15 @@ package object dragonBall{
                 
                 transformacion match{
                   // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
-                  case Some(Mono(anterior)) => (atacante,anterior.especie(Saiyajin(false,None)))
-                  case _ => (atacante, nuevoSaiyajin)
+                  case Some(Mono(anterior)) => (atacanteSinPotenciador,anterior.especie(Saiyajin(false,None)))
+                  case _ => (atacanteSinPotenciador, nuevoSaiyajin)
                   
                   }
-            case _ => (atacante,oponenteAtacado)
+            case _ => (atacanteSinPotenciador,oponenteAtacado)
         }
         case ArmaDeFuego(municion) => 
           val armaUsada = ArmaDeFuego(municion - 1)
-          val atacanteNuevo = atacante.item(item, armaUsada)
+          val atacanteNuevo = atacanteSinPotenciador.item(item, armaUsada)
           
           oponente.especie match {
           case Humano => (atacanteNuevo, oponente.ki(-20))
@@ -205,36 +205,36 @@ package object dragonBall{
           }
           case _ => (atacanteNuevo, oponente)
         }
-      case SemillaDeErmitanio => (atacante.ki(atacante.kiMaximo),oponente)
+      case SemillaDeErmitanio => (atacanteSinPotenciador.ki(atacanteSinPotenciador.kiMaximo),oponente)
     }
   }
   
   def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
-    atacante.perderPotenciador
-    atacante.especie match {
-      case Monstruo(_,_) if atacante.ki > oponente.ki =>  atacante.especie.asInstanceOf[Monstruo].comer(atacante, oponente)
-      case _ => (atacante, oponente)
+    val atacanteNuevo : Guerrero = atacante.perderPotenciador
+    atacanteNuevo.especie match {
+      case Monstruo(_,_) if atacanteNuevo.ki > oponente.ki =>  atacanteNuevo.especie.asInstanceOf[Monstruo].comer(atacanteNuevo, oponente)
+      case _ => (atacanteNuevo, oponente)
     }
   }
   
   def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
     
-    atacante.perderPotenciador
-    var atacanteTransformado = atacante.especie match{
+    val atacanteNuevo : Guerrero = atacante.perderPotenciador
+    var atacanteTransformado = atacanteNuevo.especie match{
       
       case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
-      case Saiyajin(true, estado) if atacante.inventario.contains(FotoDeLaLuna) =>
+      case Saiyajin(true, estado) if atacanteNuevo.inventario.contains(FotoDeLaLuna) =>
         
         estado match { //TODO este choclo se podria separar
-          case Some(_) =>atacante.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(atacante.especie.asInstanceOf[Saiyajin]
-                                .transformacion(Mono(atacante)))
+          case Some(_) =>atacanteNuevo.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(atacanteNuevo.especie.asInstanceOf[Saiyajin]
+                                .transformacion(Mono(atacanteNuevo)))
           
-          case None =>  atacante.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(atacante.especie.asInstanceOf[Saiyajin]
-                                .transformacion(Mono(atacante)))
+          case None =>  atacanteNuevo.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(atacanteNuevo.especie.asInstanceOf[Saiyajin]
+                                .transformacion(Mono(atacanteNuevo)))
         }
-      case _ => atacante
+      case _ => atacanteNuevo
     }
     
     return (atacanteTransformado, oponente)
@@ -268,25 +268,25 @@ package object dragonBall{
   
   def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
    
-    atacante.perderPotenciador
-    var nuevoGuerrero : Guerrero = atacante
-    atacante.especie match{
+    val nuevoAtacante : Guerrero = atacante.perderPotenciador
+    var nuevoGuerrero : Guerrero = nuevoAtacante    
+    nuevoAtacante.especie match{
          
-      case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(atacante)  =>
+      case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(nuevoAtacante)  =>
         
         transformacion match {
           //si no tenia, se transforma en nivel 1
           case None => 
-            nuevoGuerrero = atacante.multiplicarKiMaximoEn(5)
+            nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5)
                                     .especie( Saiyajin(cola, Some(SSJ(1) ) ))
           
           case Some(SSJ(nivel)) =>
             // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
-            nuevoGuerrero = atacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
+            nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
          }
         (nuevoGuerrero , oponente )
         
-     case _ => (atacante, oponente)
+     case _ => (nuevoAtacante, oponente)
     }  
   } 
 
@@ -302,14 +302,14 @@ package object dragonBall{
   //##########################################
   
   def muchosGolpesNinja(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    atacante.perderPotenciador
-    atacante.especie match{
+    val nuevoAtacante : Guerrero = atacante.perderPotenciador
+    nuevoAtacante.especie match{
       case Humano => 
         oponente.especie match {
-          case Androide => (atacante.ki(-10),oponente)
-          case _ => golpeNinjaNormal(atacante,oponente)
+          case Androide => (nuevoAtacante.ki(-10),oponente)
+          case _ => golpeNinjaNormal(nuevoAtacante,oponente)
           }
-      case _ =>  golpeNinjaNormal(atacante,oponente)
+      case _ =>  golpeNinjaNormal(nuevoAtacante,oponente)
     }
   }
 
@@ -324,23 +324,22 @@ package object dragonBall{
   }
   
   def explotar(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    atacante.perderPotenciador
-    atacante.especie match{
+    val nuevoAtacante : Guerrero = atacante.perderPotenciador
+    var nuevoOponente : Guerrero = oponente
+    nuevoAtacante.especie match{
       case Androide | Monstruo(_,_) => 
         oponente.especie match {
           case Androide => 
-            oponente.ki(atacante.ki * -3)
-          case Namekusein => oponente.ki(atacante.ki * -2)
-          if (oponente.ki == 0)
+           nuevoOponente = oponente.ki(nuevoAtacante.ki * -3)
+          case Namekusein => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)
+          if (nuevoOponente.ki == 0)
           {
-            oponente.ki(1)
+            nuevoOponente = oponente.ki(1)
           }
-          case _ => oponente.ki(atacante.ki * -2)
+          case _ => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)
         }
-        atacante.kiTo(0)
-        atacante.morite
-       (atacante,oponente)
-      case _ => (atacante,oponente)
+       (nuevoAtacante.kiTo(0).morite,nuevoOponente)
+      case _ => (atacante,nuevoOponente)
     }
   }
   
@@ -356,8 +355,8 @@ package object dragonBall{
           case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
         }    
     }
-    atacanteNuevo.perderPotenciador
-    return (atacanteNuevo, oponenteNuevo)
+    var atacanteSinPotenciador = atacanteNuevo.perderPotenciador
+    (atacanteSinPotenciador, oponenteNuevo)
   }
   
   def genkidama(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
@@ -366,8 +365,8 @@ package object dragonBall{
     var oponenteNuevo = oponente
       
     oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
-    atacanteNuevo.perderPotenciador
-    (atacanteNuevo, oponenteNuevo)
+    val atacanteSinPotenciador = atacanteNuevo.perderPotenciador
+    (atacanteSinPotenciador, oponenteNuevo)
   }
   
   case class Ataque(nombre :String, kiRequerido :Int) 
