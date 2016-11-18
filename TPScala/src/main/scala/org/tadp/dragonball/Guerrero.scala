@@ -59,18 +59,17 @@ package object dragonBall{
     
     def planDeAtaqueContra(oponente :Guerrero, cantidadRounds : Int)(criterio :Criterio) :List[Movimiento] = {
       
-      //si no hay rounds por pelear no se devuelve ningun movimiento
-      if(cantidadRounds < 1) return List()
-      
-      //seleccionar mejor movimiento
-      var mejorMovimiento = this.movimientoMasEfectivoContra(oponente, criterio)
-      var planDeAtaque = List(mejorMovimiento)
-      //simular el round
-      var peleadores = this.pelearRound(mejorMovimiento)(oponente)
-      //volver a repetir con cantidad de rounds - 1 y con los peleadores luego de pelear el round
-      planDeAtaque :: (peleadores._1.planDeAtaqueContra(peleadores._2, cantidadRounds - 1)(criterio))
-      
-      planDeAtaque   
+     var plan:List[Movimiento] = List()
+      /* Podria hacer directamente la funcion mejor movimiento aplicada parcialmente con el criterio */
+      val rounds = List.fill(cantidadRounds) (criterio)
+      rounds.foldLeft((this,oponente)) {
+        case ((atc,opt),criter) => {
+          val movimiento = atc.movimientoMasEfectivoContra(opt, criter)
+          plan = plan :+ (movimiento)
+          atc.pelearRound(movimiento)(opt)
+        }
+      }
+      plan
      }
     
     def pelearContra(oponente :Guerrero)(planDeAtaque : List[Movimiento]) : ResultadoPelea = {
@@ -500,4 +499,88 @@ package object dragonBall{
   trait ResultadoPelea
   case class tenemosUnGanador(ganador :Guerrero) extends ResultadoPelea
   case class sinGanador(atacante :Guerrero, oponente :Guerrero) extends ResultadoPelea
+  
+  /*  
+  type ¬[A] = A => Nothing
+  type ∨[T, U] = ¬[¬[T] with ¬[U]]
+  type ¬¬[A] = ¬[¬[A]]
+  type |∨|[T, U] = { type λ[X] = ¬¬[X] <:< (T ∨ U) }
+  def size[T: (Int |∨| String)#λ](t: T) =
+  t match {
+    case i: Int => i
+    case s: String => s.length
+  }
+ 
+  */
+  type Pelea = (Guerrero,Guerrero)
+  
+  
+  sealed trait ResultadoMonad {
+    def map(f : Movimiento): ResultadoMonad
+    def haFinalizado : Boolean
+  }
+  
+  case class SinGanador(atc:Guerrero,opo:Guerrero) extends ResultadoMonad {
+    def map(f: Movimiento):ResultadoMonad = {
+      val (nuevoAtc,nuevoOpo) = f(atc,opo)
+      val estados = (nuevoAtc.estado,nuevoOpo.estado)
+      estados match{
+        case (_,Muerto) => ConGanador(nuevoAtc)
+        case (Muerto,_) => ConGanador(nuevoOpo)
+        case (_,_) => SinGanador(nuevoAtc,nuevoOpo)
+      }
+    }
+    def haFinalizado = true
+  }
+  
+  case class ConGanador(ganador:Guerrero) extends ResultadoMonad {
+    def haFinalizado = true
+    def map(f: Movimiento):ResultadoMonad = this
+  }
+  /*
+  class PeleaOrGuerrero[T]
+  object PeleaOrGuerrero {
+    implicit object PeleaWitness extends PeleaOrGuerrero[Pelea]
+    implicit object GuerreroWitness extends PeleaOrGuerrero[Guerrero]
+  }
+  
+  sealed abstract class ResultadoPeleaMonad[PeleaOrGuerrero extends Product with Serializable{
+
+    def get: PeleaOrGuerrero
+    
+    def map[PeleaOrGuerrero](f: Movimiento ) : ResultadoPeleaMonad[PeleaOrGuerrero]
+    
+    def apply[PeleaOrGuerrero](x: PeleaOrGuerrero): ResultadoPeleaMonad[PeleaOrGuerrero] = if (haFinalizado) None else Some(x)
+    
+    def haFinalizado : Boolean
+    def getGanador: Guerrero
+  }
+  
+  case class ConGanador[Guerrero](x: Guerrero) extends ResultadoPeleaMonad[Guerrero] {
+    def haFinalizado = true
+    def get : Guerrero = x
+    def getGanador : Guerrero = x
+  }
+  
+  case class SinGanador[+Pelea] (x : (Guerrero,Guerrero)) extends ResultadoPeleaMonad[Pelea]{
+    def haFinalizado = false
+    
+    def map(f : Movimiento) : ResultadoPeleaMonad[PeleaOrGuerrero[_]] = {
+      val (nuevoAtacante,nuevoOponente) = f(x._1,x._2)
+      nuevoOponente.estado match{
+        case Muerto => ConGanador(nuevoAtacante)
+        case _ => 
+      }
+    }
+    
+    
+    def get : Pelea = x
+    def getGanador : Guerrero = {
+      this.get match {
+        case (atacante,oponente) => if (oponente.estado == Muerto) atacante else oponente
+      }
+    }
+  }
+  * 
+  */
 }
