@@ -103,6 +103,7 @@ package object dragonBall{
       estado match{
         case Inconsciente =>
           this.estado(Normal)
+        case _ => this
           
       }
     }
@@ -115,6 +116,7 @@ package object dragonBall{
           val kiInicial = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int] 
       
           this.kiMaximo(kiInicial)
+        case _ => this
       }
     }
   } 
@@ -206,6 +208,8 @@ package object dragonBall{
           case _ => (atacanteNuevo, oponente)
         }
       case SemillaDeErmitanio => (atacanteSinPotenciador.ki(atacanteSinPotenciador.kiMaximo),oponente)
+      
+      case _ => (atacante,oponente)
     }
   }
   
@@ -283,6 +287,8 @@ package object dragonBall{
           case Some(SSJ(nivel)) =>
             // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
             nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
+          //Agrego caso mono pero que no pase nada por ahora
+          case Some(Mono(_)) => 
          }
         (nuevoGuerrero , oponente )
         
@@ -404,6 +410,7 @@ package object dragonBall{
       transformacion match {
         case Some(SSJ(nivel)) => nivel
         case None => 0
+        case _ => 0
       }
     }
     
