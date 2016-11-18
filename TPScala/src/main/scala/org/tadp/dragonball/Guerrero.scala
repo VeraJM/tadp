@@ -327,21 +327,22 @@ package object dragonBall{
     val nuevoAtacante : Guerrero = atacante.perderPotenciador
     var nuevoOponente : Guerrero = oponente
     nuevoAtacante.especie match{
-      case Androide | Monstruo(_,_) => 
-        oponente.especie match {
-          case Androide => 
-           nuevoOponente = oponente.ki(nuevoAtacante.ki * -3)
-          case Namekusein => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)
-          if (nuevoOponente.ki == 0)
+      case Androide | Monstruo(_,_) => nuevoAtacante.especie match {
+          case Androide => nuevoOponente = oponente.ki(nuevoAtacante.ki * -3)
+          case _ => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)}
+       case _ => 
+      }
+
+    nuevoOponente.especie match {
+          case Namekusein => 
+          if (nuevoOponente.ki <= 0 && oponente.ki > 0)
           {
-            nuevoOponente = oponente.ki(1)
+            nuevoOponente = oponente.kiTo(1)
           }
-          case _ => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)
+          case _ => 
         }
        (nuevoAtacante.kiTo(0).morite,nuevoOponente)
-      case _ => (atacante,nuevoOponente)
-    }
-  }
+ }
   
   def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
     var atacanteNuevo = atacante

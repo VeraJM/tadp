@@ -14,9 +14,10 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
   val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
   val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
-  val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio))
-  val movimientosMonstruo: List[Movimiento] = List(comerOponente)
+  val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio),explotar)
+  val movimientosMonstruo: List[Movimiento] = List(comerOponente,explotar)
   val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
+  val movimientosNamekusein: List[Movimiento] = List(muchosGolpesNinja)
   
   val itemsGoku: List[Item] = List(SemillaDeErmitanio, ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)
@@ -29,7 +30,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val cell = Guerrero("Cell", Monstruo(soloAndroides, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val mrSatan = Guerrero("Satan", Humano, movimientosHumano, ki = 80,potenciadorGenkidama = 0, kiMaximo = 250, inventario = List(), Normal)
-  
+  val piccoro = Guerrero("Piccoro", Namekusein, movimientosNamekusein, ki = 600,potenciadorGenkidama = 0, kiMaximo = 1300, inventario = List(), Normal)
+
   val kamehameha = ondaDeEnergia(400) _
   val bigBang = ondaDeEnergia(300) _
   val masenko = ondaDeEnergia(200) _
@@ -120,6 +122,50 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         val atacar = vegeta.hacerMovimiento(muchosGolpesNinja, cell)
 
         atacar._2.ki shouldBe (1480)
+      }
+      
+      "Cell explota y muere" in {
+
+        val atacar = cell.hacerMovimiento(explotar, vegeta)
+
+        atacar._1.estado shouldBe (Muerto)
+      }
+      
+       "Cell explota y pierde todo su ki" in {
+
+        val atacar = cell.hacerMovimiento(explotar, vegeta)
+
+        atacar._1.ki shouldBe (0)
+      }
+       
+      "Cell con 200 de ki explota y hace doble de ki por ser monstruo a vegeta" in {
+
+        val cell2 = cell.kiTo(200)
+        val atacar = cell2.hacerMovimiento(explotar, vegeta)
+
+        atacar._2.ki shouldBe (1600)
+      }
+      
+     "Androide16 con 200 de ki explota y hace triple de ki por ser androide a vegeta" in {
+
+        val androide16B = androide16.kiTo(200)
+        val atacar = androide16B.hacerMovimiento(explotar, vegeta)
+
+        atacar._2.ki shouldBe (1400)
+      }
+     
+     "Cell explota y daña a piccoro casi matandolo dejandolo en 1 de ki (por ser namekusein)" in {
+
+        val atacar = cell.hacerMovimiento(explotar, piccoro)
+
+        atacar._2.ki shouldBe (1)
+      }
+     
+      "Piccoro intenta explotar y no hace nada por no ser monstruo o androide" in {
+
+        val atacar = piccoro.hacerMovimiento(explotar, cell)
+
+        atacar._2.ki shouldBe (1500)
       }
     }
 
