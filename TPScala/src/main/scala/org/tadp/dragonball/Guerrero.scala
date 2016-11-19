@@ -2,9 +2,9 @@ package org.tadp.dragonball
 
 package object dragonBall{
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //               Guerrero
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   case class Guerrero(nombre: String,
                       especie: Especie,
@@ -16,8 +16,11 @@ package object dragonBall{
                       estado: Estado = Normal) {
     
     /* "SETTERS" */
-    def ki (delta: Int) : Guerrero = copy(ki = ki + delta min kiMaximo)
-    def kiTo(value: Int) : Guerrero = copy(ki=value)
+    def ki (delta: Int) : Guerrero = {
+      val nuevoki = (ki + delta min kiMaximo) max 0
+      val nuevoGuerrero = copy(ki = nuevoki)
+      if(nuevoki==0) nuevoGuerrero.morite else nuevoGuerrero}
+    def kiTo(value: Int) : Guerrero = ki(-(ki-value))
     def estado(nuevoEstado: Estado) : Guerrero = copy (estado=nuevoEstado)
     def kiMaximo(nuevoMaximo: Int) : Guerrero = copy (kiMaximo=nuevoMaximo)
     def especie(especie: Especie) : Guerrero = copy (especie=especie)
@@ -27,7 +30,7 @@ package object dragonBall{
     
     def multiplicarKiMaximoEn(valor :Int) :Guerrero = kiMaximo( kiMaximo * valor)
     
-    // Magia para crear la lista de inventario con un item modificado, ej: la arma de fuego con una bala menos
+    // Crear la lista de inventario con un item modificado, ej: la arma de fuego con una bala menos
     def item(itemViejo: Item, itemNuevo: Item) : Guerrero = copy(inventario = inventario.updated(inventario.indexOf(itemViejo), itemNuevo))
     
     def esDeEspecie(especie : Especie) = {this.especie == especie}
@@ -72,19 +75,23 @@ package object dragonBall{
       plan
      }
     
-    def pelearContra(oponente :Guerrero)(planDeAtaque : List[Movimiento]) : ResultadoPelea = {
-      val estadoFinalPeleadores : (Guerrero, Guerrero) =  planDeAtaque.foldLeft((this, oponente))({(peleadores :(Guerrero,Guerrero), mov :Movimiento) => 
-                                                                                                      mov(peleadores._1, peleadores._2)})
-      
-      estadoFinalPeleadores._1.estado match{
-        case Muerto => tenemosUnGanador(estadoFinalPeleadores._2)
-        case _ => estadoFinalPeleadores._2.estado match{
-          case Muerto => tenemosUnGanador(estadoFinalPeleadores._1)
-          case _ => sinGanador(estadoFinalPeleadores._1, estadoFinalPeleadores._2)
-        }
-      }
+    def pelearContra(oponente :Guerrero)(planDeAtaque : List[Movimiento]) : Pelea = {
+  
+      val peleadores:Pelea = PeleaEnCurso(this,oponente)
+                                                                                                      
+      val estado : Pelea = planDeAtaque.foldLeft(peleadores)({
+        (peleadores:Pelea,mov:Movimiento) => peleadores.pelearRound(mov)
+      })
+      /* LO DEJO SOLO PARA SABER QUE ERA LO ANTERIOR */
+//      estadoFinalPeleadores._1.estado match{
+//        case Muerto => tenemosUnGanador(estadoFinalPeleadores._2)
+//        case _ => estadoFinalPeleadores._2.estado match{
+//          case Muerto => tenemosUnGanador(estadoFinalPeleadores._1)
+//          case _ => sinGanador(estadoFinalPeleadores._1, estadoFinalPeleadores._2)
+//        }
+//      }
+      estado
     }
-    
   
     //cambios de estado    
     def recuperaKiMaximo :Guerrero = this.kiTo( this.kiMaximo)
@@ -92,8 +99,9 @@ package object dragonBall{
     
     def morite :Guerrero = {
       val nuevoGuerrero : Guerrero = this.perderPotenciador
-      nuevoGuerrero.estado(Muerto)
+      nuevoGuerrero.estado(Muerto).copy(ki = 0)
     }
+    
     def poneteInconsciente :Guerrero =  {
       val nuevoGuerrero : Guerrero = this.perderPotenciador
       
@@ -135,9 +143,9 @@ package object dragonBall{
     (nuevoAtacante,nuevoOponente)
   }
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //      Criterios de movimientos
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def mayorDanioAlEnemigo(atacante: Guerrero, oponente: Guerrero) : Int = {
     oponente.kiMaximo - oponente.ki
@@ -148,12 +156,12 @@ package object dragonBall{
   }
   
   def diferenciaDeKi(atacante: Guerrero, oponente: Guerrero) : Int = {
-    atacante.ki.compare(oponente.ki)
+    atacante.ki - oponente.ki
   }
  
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //      Movimientos de pelea
-  //##########################################  
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     val atacanteNuevo =  atacante.aumentarPotenciador
     (atacanteNuevo, oponente)
@@ -221,8 +229,11 @@ package object dragonBall{
   
   def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
     val atacanteNuevo : Guerrero = atacante.perderPotenciador
+    
+    /* Si no puede comerselo por no tener suficiente ki o no ser monstruo no pasa nada */
+    /* Podriamos tirar una exception cuando no es monstruo, pero por interpretacion del enunciado no lo hacemos */
     atacanteNuevo.especie match {
-      case Monstruo(_,_) if atacanteNuevo.ki > oponente.ki =>  atacanteNuevo.especie.asInstanceOf[Monstruo].comer(atacanteNuevo, oponente)
+      case esp:Monstruo => if (atacanteNuevo.ki > oponente.ki) esp.comer(atacanteNuevo, oponente) else (atacanteNuevo,oponente)
       case _ => (atacanteNuevo, oponente)
     }
   }
@@ -250,9 +261,9 @@ package object dragonBall{
     return (atacanteTransformado, oponente)
   }
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //  FORMAS DE DIGESTION DE LOS MONSTRUOS
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def soloAndroides(monstruo :Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
     comida.especie match{
@@ -260,7 +271,7 @@ package object dragonBall{
                        var movimientosMonstruo = monstruo.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion
                        var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
                                                                 .movimientos(movimientosMonstruo ++ movimientosDeVictima))
-                       (monstruoLleno, comida)
+                       (monstruoLleno, comida.morite)
       case _ => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
     }
   }
@@ -268,13 +279,13 @@ package object dragonBall{
   def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
     var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
                                                   .movimientos(comida.habilidades))
-                                                  
-    (monstruoLleno, comida)
+    //Console.println("ME LO COMI")                                              
+    (monstruoLleno, comida.morite)
   }
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //  MOVIMIENTOS DEL SAIYAJIN
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
    
@@ -308,12 +319,12 @@ package object dragonBall{
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
    
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              MAGIA
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  type Pase = (Guerrero,Guerrero) => (Guerrero,Guerrero)
-  def magia(pase :Pase)(atacante :Guerrero, oponente :Guerrero): (Guerrero,Guerrero) = {
+  //type Pase = (Guerrero,Guerrero) => (Guerrero,Guerrero)
+  def magia(pase :Movimiento)(atacante :Guerrero, oponente :Guerrero): (Guerrero,Guerrero) = {
     
     val nuevoAtacante : Guerrero = atacante.perderPotenciador
     
@@ -338,9 +349,9 @@ package object dragonBall{
   }
   
 
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              ATAQUES
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def muchosGolpesNinja(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
     val nuevoAtacante : Guerrero = atacante.perderPotenciador
@@ -365,24 +376,21 @@ package object dragonBall{
   }
   
   def explotar(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+    //Console.println("EXPLOTEEEEE" + atacante.nombre)
     val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    var nuevoOponente : Guerrero = oponente
-    nuevoAtacante.especie match{
+    
+    val nuevoOponente : Guerrero = nuevoAtacante.especie match{
       case Androide | Monstruo(_,_) => nuevoAtacante.especie match {
-          case Androide => nuevoOponente = oponente.ki(nuevoAtacante.ki * -3)
-          case _ => nuevoOponente = oponente.ki(nuevoAtacante.ki * -2)}
-       case _ => 
+          case Androide => oponente.ki(nuevoAtacante.ki * -3)
+          case _ => oponente.ki(nuevoAtacante.ki * -2)}
+       case _ => throw new InvalidAttackException("Solo pueden explotar los androides y monstruos")
       }
 
-    nuevoOponente.especie match {
-          case Namekusein => 
-          if (nuevoOponente.ki <= 0 && oponente.ki > 0)
-          {
-            nuevoOponente = oponente.kiTo(1)
-          }
-          case _ => 
+    val finalOpo:Guerrero = nuevoOponente.especie match {
+          case Namekusein => if (nuevoOponente.ki == 0) nuevoOponente.kiTo(1).estado(Normal) else nuevoOponente
+          case _ => nuevoOponente
         }
-       (nuevoAtacante.kiTo(0).morite,nuevoOponente)
+       (nuevoAtacante.kiTo(0).morite,finalOpo)
  }
   
   def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
@@ -413,9 +421,9 @@ package object dragonBall{
   
   case class Ataque(nombre :String, kiRequerido :Int) 
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //            Estados
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
   sealed trait Estado
   case object Muerto extends Estado
@@ -426,9 +434,9 @@ package object dragonBall{
   type Criterio = (Guerrero,Guerrero) => Int
     
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              Especies
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   sealed trait Especie
 
@@ -468,18 +476,18 @@ package object dragonBall{
     }
   };
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //          Transformaciones
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   sealed trait Transformacion
   case class SSJ(nivel: Int) extends Transformacion
   case class Mono(estadoAnterior: Guerrero) extends Transformacion
   
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              Items
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   sealed trait Item
   abstract class Arma() extends Item
   case object SemillaDeErmitanio extends Item
@@ -492,13 +500,13 @@ package object dragonBall{
   case object EsferaDragon extends Item
   
   
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //        Resultados de pelea
-  //##########################################
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  trait ResultadoPelea
-  case class tenemosUnGanador(ganador :Guerrero) extends ResultadoPelea
-  case class sinGanador(atacante :Guerrero, oponente :Guerrero) extends ResultadoPelea
+//  trait ResultadoPelea
+//  case class tenemosUnGanador(ganador :Guerrero) extends ResultadoPelea
+//  case class sinGanador(atacante :Guerrero, oponente :Guerrero) extends ResultadoPelea
   
   /*  
   type ¬[A] = A => Nothing
@@ -512,31 +520,60 @@ package object dragonBall{
   }
  
   */
-  type Pelea = (Guerrero,Guerrero)
+  //type Pelea = (Guerrero,Guerrero)
   
   
-  sealed trait ResultadoMonad {
-    def map(f : Movimiento): ResultadoMonad
-    def haFinalizado : Boolean
+  sealed abstract class Pelea {
+    //MAP por ahora esta al pedo, lo dejo por las dudas porque lo hice primero
+    def map(f : Movimiento): Pelea
+    def pelearRound(mov : Movimiento): Pelea
+    override def equals(x : Any) : Boolean
   }
   
-  case class SinGanador(atc:Guerrero,opo:Guerrero) extends ResultadoMonad {
-    def map(f: Movimiento):ResultadoMonad = {
+  case class PeleaEnCurso(atc:Guerrero,opo:Guerrero) extends Pelea {
+    def map(f: Movimiento):Pelea = {
       val (nuevoAtc,nuevoOpo) = f(atc,opo)
       val estados = (nuevoAtc.estado,nuevoOpo.estado)
       estados match{
-        case (_,Muerto) => ConGanador(nuevoAtc)
-        case (Muerto,_) => ConGanador(nuevoOpo)
-        case (_,_) => SinGanador(nuevoAtc,nuevoOpo)
+        case (_,Muerto) => PeleaTerminada(nuevoAtc)
+        case (Muerto,_) => PeleaTerminada(nuevoOpo)
+        case (_,_) => PeleaEnCurso(nuevoAtc,nuevoOpo)
       }
     }
-    def haFinalizado = true
+    
+    override def equals(x:Any) = { x match {
+      case PeleaEnCurso(atacante,oponente) => atacante.nombre == atc.nombre && oponente.nombre == opo.nombre
+      case _ => false}
+    }
+    override def hashCode = (atc.nombre + opo.nombre).hashCode
+    def get : (Guerrero,Guerrero) = (atc,opo)
+    
+    def pelearRound(movimiento: Movimiento) = {
+      val (nuevoAtacante,nuevoOponente) = atc.hacerMovimiento(movimiento, opo)
+      val (finalAtc,finalOpo) = turnoOponente(nuevoAtacante,nuevoOponente)
+
+      val estados = (finalAtc.estado,finalOpo.estado)
+      estados match {
+        case (_,Muerto) => PeleaTerminada(finalAtc)
+        case (Muerto,_) => PeleaTerminada(finalOpo)
+        case (_,_) => PeleaEnCurso(finalAtc,finalOpo)
+      }
+    }
+    
   }
   
-  case class ConGanador(ganador:Guerrero) extends ResultadoMonad {
-    def haFinalizado = true
-    def map(f: Movimiento):ResultadoMonad = this
+  case class PeleaTerminada(ganador:Guerrero) extends Pelea {
+    def map(f: Movimiento):Pelea = this
+    def get : Guerrero = ganador
+    def pelearRound(mov:Movimiento) : Pelea = this
+    override def equals(x:Any) = { x match {
+      case PeleaTerminada(aGanador) => aGanador.nombre == ganador.nombre
+      case _ => false}
+    }
+    override def hashCode = ganador.nombre.hashCode
   }
+  
+  case class InvalidAttackException(s:String) extends Exception(s)
   /*
   class PeleaOrGuerrero[T]
   object PeleaOrGuerrero {
