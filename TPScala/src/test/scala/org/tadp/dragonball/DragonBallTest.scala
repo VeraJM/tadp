@@ -5,6 +5,10 @@ import org.scalatest.Matchers
 import org.scalatest.BeforeAndAfter
 import org.scalatest.Matchers
 import org.tadp.dragonball.dragonBall._
+import org.tadp.dragonball.Movimientos._
+import org.tadp.dragonball.Criterios._
+import org.tadp.dragonball.Especies._
+import org.tadp.dragonball.Items._
 
 class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
@@ -51,6 +55,19 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val piccolo = Guerrero("Piccoro", Namekusein, movimientosNamekusein, ki = 600,potenciadorGenkidama = 0, kiMaximo = 1300, inventario = List(), Normal)
   val krilin = Guerrero("Krilin", Humano, movimientosHumano, ki = 250, potenciadorGenkidama = 0, kiMaximo = 900, inventario = sieteEsferas, Normal)
   
+  
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  //      ASSERT PARA LAS MONADAS DEL PUNTO 4
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  def assertOnTerminada(resultado:Pelea,ganador:Guerrero) = resultado match{
+    case pelea:PeleaTerminada => pelea.get.shouldBe(ganador)
+    case _ => fail
+  }
+  
+  def assertOnEnCurso(resultado:Pelea,atc:Guerrero,opo:Guerrero) = resultado match{
+    case pelea:PeleaEnCurso => pelea.get.shouldBe((atc,opo)) 
+    case _ => fail
+  }
 
   "Torneo Artes Marciales" - {
 
@@ -406,6 +423,23 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       }
 
   }
+  "Planes de ataque" - {
+    
+    "Plan de ataque Goku vs Vegeta" in {
+      
+      val planDeGoku = goku.planDeAtaqueContra(vegeta, 3)(diferenciaDeKi)
+//      planDeGoku.foreach { x => Console.println(x) }
+//      Console.println(planDeGoku.length)
+      /* Goku planea primero atacar, recuperarse por la represalia y volver a atacar */
+      planDeGoku.length shouldBe (3)
+      planDeGoku(0) shouldBe (movUsarArmaFilosa)
+      planDeGoku(1) shouldBe (movCargarki)
+      planDeGoku(2) shouldBe (movUsarArmaFilosa)
+      
+      
+    }
+    
+  }
   
   "Peleas hasta el final" - {
     
@@ -414,8 +448,10 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val planDeAtaque = List(movUsarArmaFilosa,movCargarki,movCargarki)
       val estadoFinal: Pelea = goku.pelearContra(vegeta)(planDeAtaque)
       
-      estadoFinal shouldEqual(PeleaEnCurso(goku,vegeta))
-      
+      val gokuFinal = Guerrero("Goku",Saiyajin(false,None),movimientosGoku,100,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
+      val vegetaFinal = Guerrero("Vegeta",Saiyajin(false,None),movimientosGoku,101,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
+
+      assertOnEnCurso(estadoFinal,gokuFinal,vegetaFinal)
       
     }
     
@@ -426,7 +462,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val planDeAtaque = List(movUsarArmaFilosa,movCargarki,movUsarArmaFilosa)
       val estadoFinal: Pelea = goku.pelearContra(gohan)(planDeAtaque)
       
-      estadoFinal shouldEqual(PeleaTerminada(gohan))
+      val gohanFinal = Guerrero("Gohan",Saiyajin(false,None),movimientosGoku,300,0,2000,List(SemillaDeErmitanio),Normal)
+      assertOnTerminada(estadoFinal,gohanFinal)
       
       
     }
@@ -437,9 +474,9 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val estadoFinal: Pelea = goku.pelearContra(majinBuu)(planDeAtaque)
       /* TODO: Bug, Majin Boo explota y se declara ganador a goku porque su ponente esta muerto, a pesar que el tambien murio e
        * explosion. Majin Boo DEBERIA comerse a goku y no explotar */
-      estadoFinal shouldEqual(PeleaTerminada(goku))
+      val gokuFinal = Guerrero("Goku",Saiyajin(true,None),movimientosGoku,0,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Muerto)
       
-      
+      assertOnTerminada(estadoFinal,gokuFinal)
     }
   }
 
