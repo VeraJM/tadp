@@ -428,8 +428,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val gogeta = goku.hacerMovimiento(fusionarseConVegeta, cell)._1
 
-      gogeta.habiliades shouldBe (goku.habilidades ++ vegeta.habilidades)
-      gogeta.ki shouldBe (goku.ki ++ vegeta.ki)
+      gogeta.habilidades shouldBe (goku.habilidades ++ vegeta.habilidades)
+      gogeta.ki shouldBe (goku.ki + vegeta.ki)
       gogeta.kiMaximo shouldBe (goku.kiMaximo + vegeta.kiMaximo)
     }
 
