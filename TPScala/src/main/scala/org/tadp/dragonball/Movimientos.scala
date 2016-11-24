@@ -39,13 +39,10 @@ object Movimientos {
           case Androide => (atacanteSinPotenciador, oponente)
           case _ => if (oponente.ki < 300) (atacanteSinPotenciador,oponente.estado(Inconsciente))
                     else (atacanteSinPotenciador, oponente)
-          
           }
         case ArmaFilosa =>
           val oponenteAtacado = oponente.ki(-1*atacanteSinPotenciador.ki)
-          
           oponenteAtacado.especie match{
-            
             case Saiyajin(true,transformacion) =>
                 val nuevoSaiyajin = oponenteAtacado.especie(Saiyajin(cola=false,transformacion)).kiTo(1)
                 
@@ -53,7 +50,6 @@ object Movimientos {
                   // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
                   case Some(Mono(anterior)) => (atacanteSinPotenciador,anterior.especie(Saiyajin(false,None)))
                   case _ => (atacanteSinPotenciador, nuevoSaiyajin)
-                  
                   }
             case _ => (atacanteSinPotenciador,oponenteAtacado)
         }
@@ -89,23 +85,19 @@ object Movimientos {
   def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
     
     val atacanteNuevo : Guerrero = atacante.perderPotenciador
-    var atacanteTransformado = atacanteNuevo.especie match{
+    val atacanteTransformado = atacanteNuevo.especie match{
       
       case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
-      case Saiyajin(true, estado) if atacanteNuevo.inventario.contains(FotoDeLaLuna) =>
+      case espSaiyajin@Saiyajin(true, transformacion) if atacanteNuevo.inventario.contains(FotoDeLaLuna) =>
         
-        estado match { //TODO este choclo se podria separar
-          case Some(_) =>atacanteNuevo.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(atacanteNuevo.especie.asInstanceOf[Saiyajin]
-                                .transformacion(Mono(atacanteNuevo)))
-          
-          case None =>  atacanteNuevo.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(atacanteNuevo.especie.asInstanceOf[Saiyajin]
-                                .transformacion(Mono(atacanteNuevo)))
+        transformacion match { //TODO este choclo se podria separar
+          case Some(_) => atacanteNuevo.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(espSaiyajin.transformacion(Mono(atacanteNuevo)))
+          case None => atacanteNuevo.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                .especie(espSaiyajin.transformacion(Mono(atacanteNuevo)))
         }
       case _ => atacanteNuevo
     }
-    
     return (atacanteTransformado, oponente)
   }
   
