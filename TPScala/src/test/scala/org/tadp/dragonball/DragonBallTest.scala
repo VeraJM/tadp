@@ -13,9 +13,9 @@ import org.tadp.dragonball.Items._
 class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
   //MOVIMIENTOS
-  val movUsarArmaFilosa = usarItem(ArmaFilosa) _
-  val movCargarki = cargarKi _
-  val movDejarseFajar = dejarseFajar _
+  val movUsarArmaFilosa = usarItem(ArmaFilosa)
+  val movCargarki = cargarKi 
+  val movDejarseFajar = dejarseFajar
 
   val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
   val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
@@ -24,9 +24,9 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
   val movimientosNamekusein: List[Movimiento] = List(muchosGolpesNinja)
   
-  val kamehameha = ondaDeEnergia(400) _
-  val bigBang = ondaDeEnergia(300) _
-  val masenko = ondaDeEnergia(200) _
+  val kamehameha = ondaDeEnergia(400) 
+  val bigBang = ondaDeEnergia(300) 
+  val masenko = ondaDeEnergia(200) 
     
   val curarse :Movimiento = (atacante,oponente) => (atacante.recuperaKiMaximo, oponente)
   val curaOponente :Movimiento = (atacante,oponente) => (atacante, oponente.recuperaKiMaximo)

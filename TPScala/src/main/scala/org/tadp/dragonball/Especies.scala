@@ -1,6 +1,7 @@
 package org.tadp.dragonball
 
 import org.tadp.dragonball.dragonBall._
+import org.tadp.dragonball.Movimientos.Movimiento
 
 object Especies {
   

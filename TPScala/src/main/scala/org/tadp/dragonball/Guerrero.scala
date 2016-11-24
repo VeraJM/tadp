@@ -3,6 +3,9 @@ package org.tadp.dragonball
 import org.tadp.dragonball.Criterios._
 import org.tadp.dragonball.Especies._
 import org.tadp.dragonball.Items._
+import org.tadp.dragonball.Movimientos.usarItem
+import org.tadp.dragonball.Movimientos.dejarseFajar
+import org.tadp.dragonball.Movimientos.Movimiento
 
 package object dragonBall{
   
@@ -40,13 +43,22 @@ package object dragonBall{
     def esDeEspecie(especie : Especie) = {this.especie == especie}
     
     def hacerMovimiento(movimiento : Movimiento, oponente : Guerrero) : (Guerrero,Guerrero) = {
-      estado match {
+     val peleadores = estado match {
         // En caso de estar muerto no pasa nada
         // Aca es donde podria tirar error por estar muerto y querer hacer algo
         case Muerto => (this,oponente)
         // Hay movimientos que se puede hacer por mas que esten inconcientes. Ej: comer semillas
+        case Inconsciente => movimiento match{
+          case usarItem(SemillaDeErmitanio) => movimiento(this.perderPotenciador, oponente)
+          case _ => (this, oponente)
+        }
         case _ => movimiento(this,oponente)
       }
+          
+     movimiento match{
+       case `dejarseFajar` => (peleadores._1.aumentarPotenciador, peleadores._2)
+       case _ => (peleadores._1.perderPotenciador, peleadores._2)
+     }
     }
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -60,7 +72,7 @@ package object dragonBall{
        * */
       val resultados = for {
         movimiento <- this.habilidades
-        (nuevoAtacante,nuevoOponente) = movimiento(this,oponente)
+        (nuevoAtacante,nuevoOponente) = hacerMovimiento(movimiento, oponente)
         valor = criterio(nuevoAtacante, nuevoOponente)
       }yield (movimiento,valor)
       
@@ -237,9 +249,7 @@ package object dragonBall{
   case object Muerto extends Estado
   case object Inconsciente extends Estado
   case object Normal extends Estado
-  
-  type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
-  type Criterio = (Guerrero,Guerrero) => Int
+    type Criterio = (Guerrero,Guerrero) => Int
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //          Transformaciones

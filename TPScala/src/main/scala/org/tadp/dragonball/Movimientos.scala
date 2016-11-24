@@ -10,165 +10,166 @@ object Movimientos {
   //      Movimientos de pelea
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  def dejarseFajar(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    val atacanteNuevo =  atacante.aumentarPotenciador
-    (atacanteNuevo, oponente)
+    type Movimiento = (Guerrero,Guerrero) => (Guerrero,Guerrero)
+  
+ case object dejarseFajar extends Movimiento{
+    def apply(atacante: Guerrero, oponente: Guerrero) = (atacante, oponente);
   }
   
-  def cargarKi(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    val atacanteNuevo : Guerrero = atacante.perderPotenciador
-    atacante.especie match{
-      case Androide => (atacanteNuevo,oponente)
-      case Saiyajin (_,transformacion) => transformacion match {
-        case Some(SSJ(nivel)) => (atacanteNuevo.ki(150*nivel),oponente)
-        case _ => (atacanteNuevo.ki(100),oponente)
+  case object cargarKi extends Movimiento{
+    def apply(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
+     
+      atacante.especie match{
+        case Androide => (atacante,oponente)
+        case Saiyajin (_,transformacion) => transformacion match {
+          case Some(SSJ(nivel)) => (atacante.ki(150*nivel),oponente)
+          case _ => (atacante.ki(100),oponente)
+          }
+        case _ => (atacante.ki(100),oponente)
       }
-      case _ => (atacanteNuevo.ki(100),oponente)
     }
   }
   
-  def usarItem(item : Item)(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    // Podria crear los items como objetos que hagan apply con la tupla de guerreros
-    // Queda medio incomodo tener que llevar el conteo de las balas de las armas teniendo que 
-    // reflejarlo en la lista de items del atacante que devuelvo.
-    // La municion seria un atributo en el objeto arma de fuego
-    val atacanteSinPotenciador : Guerrero = atacante.perderPotenciador
-    item match{
-        case ArmaRoma => oponente.especie match{
-          
-          case Androide => (atacanteSinPotenciador, oponente)
-          case _ => if (oponente.ki < 300) (atacanteSinPotenciador,oponente.estado(Inconsciente))
-                    else (atacanteSinPotenciador, oponente)
+  case class usarItem(item: Item) extends Movimiento{
+    def apply(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
+      item match{
+          case ArmaRoma => oponente.especie match{
+            
+            case Androide => (atacante, oponente)
+            case _ => if (oponente.ki < 300) (atacante,oponente.estado(Inconsciente))
+                      else (atacante, oponente)
+            }
+          case ArmaFilosa =>
+            val oponenteAtacado = oponente.ki(-1*atacante.ki)
+            oponenteAtacado.especie match{
+              case Saiyajin(true,transformacion) =>
+                  val nuevoSaiyajin = oponenteAtacado.especie(Saiyajin(cola=false,transformacion)).kiTo(1)
+                  
+                  transformacion match{
+                    // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
+                    case Some(Mono(anterior)) => (atacante,anterior.especie(Saiyajin(false,None)))
+                    case _ => (atacante, nuevoSaiyajin)
+                    }
+              case _ => (atacante,oponenteAtacado)
           }
-        case ArmaFilosa =>
-          val oponenteAtacado = oponente.ki(-1*atacanteSinPotenciador.ki)
-          oponenteAtacado.especie match{
-            case Saiyajin(true,transformacion) =>
-                val nuevoSaiyajin = oponenteAtacado.especie(Saiyajin(cola=false,transformacion)).kiTo(1)
-                
-                transformacion match{
-                  // Los monos pierden la cola y la transformacion de mono, ademas quedan inconscientes
-                  case Some(Mono(anterior)) => (atacanteSinPotenciador,anterior.especie(Saiyajin(false,None)))
-                  case _ => (atacanteSinPotenciador, nuevoSaiyajin)
-                  }
-            case _ => (atacanteSinPotenciador,oponenteAtacado)
-        }
-        case ArmaDeFuego(municion) => 
-          val armaUsada = ArmaDeFuego(municion - 1)
-          val atacanteNuevo = atacanteSinPotenciador.item(item, armaUsada)
-          
-          oponente.especie match {
-          case Humano => (atacanteNuevo, oponente.ki(-20))
-          case Namekusein => oponente.estado match {
-            case Inconsciente => (atacanteNuevo,oponente.ki(-10))
+          case ArmaDeFuego(municion) => 
+            val armaUsada = ArmaDeFuego(municion - 1)
+            val atacanteNuevo = atacante.item(item, armaUsada)
+            
+            oponente.especie match {
+            case Humano => (atacanteNuevo, oponente.ki(-20))
+            case Namekusein => oponente.estado match {
+              case Inconsciente => (atacanteNuevo,oponente.ki(-10))
+              case _ => (atacanteNuevo, oponente)
+            }
             case _ => (atacanteNuevo, oponente)
           }
-          case _ => (atacanteNuevo, oponente)
-        }
-      case SemillaDeErmitanio => (atacanteSinPotenciador.ki(atacanteSinPotenciador.kiMaximo),oponente)
-      
-      case _ => (atacante,oponente)
-    }
-  }
-  
-  def comerOponente(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
-    val atacanteNuevo : Guerrero = atacante.perderPotenciador
-    
-    /* Si no puede comerselo por no tener suficiente ki o no ser monstruo no pasa nada */
-    /* Podriamos tirar una exception cuando no es monstruo, pero por interpretacion del enunciado no lo hacemos */
-    atacanteNuevo.especie match {
-      case esp:Monstruo => if (atacanteNuevo.ki > oponente.ki) esp.comer(atacanteNuevo, oponente) else (atacanteNuevo,oponente)
-      case _ => (atacanteNuevo, oponente)
-    }
-  }
-  
-  def convertirseEnMono(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {
-    
-    val atacanteNuevo : Guerrero = atacante.perderPotenciador
-    val atacanteTransformado = atacanteNuevo.especie match{
-      
-      case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
-      case espSaiyajin@Saiyajin(true, transformacion) if atacanteNuevo.inventario.contains(FotoDeLaLuna) =>
+        case SemillaDeErmitanio => (atacante.ki(atacante.kiMaximo),oponente)
         
-        transformacion match { //TODO este choclo se podria separar
-          case Some(_) => atacanteNuevo.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(espSaiyajin.transformacion(Mono(atacanteNuevo)))
-          case None => atacanteNuevo.multiplicarKiMaximoEn(3).recuperaKiMaximo
-                                .especie(espSaiyajin.transformacion(Mono(atacanteNuevo)))
-        }
-      case _ => atacanteNuevo
+        case _ => (atacante,oponente)
+      }
     }
-    return (atacanteTransformado, oponente)
+  }
+  
+  
+  case object comerOponente extends Movimiento{
+    def apply(atacante :Guerrero, oponente :Guerrero) :(Guerrero, Guerrero) ={
+      /* Si no puede comerselo por no tener suficiente ki o no ser monstruo no pasa nada */
+      /* Podriamos tirar una exception cuando no es monstruo, pero por interpretacion del enunciado no lo hacemos */
+      atacante.especie match {
+        case esp:Monstruo => if (atacante.ki > oponente.ki) esp.comer(atacante, oponente) else (atacante,oponente)
+        case _ => (atacante, oponente)
+      }
+    }
+  }
+  
+  case object convertirseEnMono extends Movimiento{
+    def apply(atacante :Guerrero, oponente:Guerrero) : (Guerrero, Guerrero) = {   
+      val atacanteTransformado = atacante.especie match{
+        
+        case Saiyajin(_,Some(Mono(_))) => throw new RuntimeException("El mono no se puede convertir en mono")
+        case espSaiyajin@Saiyajin(true, transformacion) if atacante.inventario.contains(FotoDeLaLuna) =>
+          
+          transformacion match { //TODO este choclo se podria separar
+            case Some(_) => atacante.perdeSSJ.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                  .especie(espSaiyajin.transformacion(Mono(atacante)))
+            case None => atacante.multiplicarKiMaximoEn(3).recuperaKiMaximo
+                                  .especie(espSaiyajin.transformacion(Mono(atacante)))
+          }
+        case _ => atacante
+      }
+      return (atacanteTransformado, oponente)
+    }
   }
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              ATAQUES
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  def muchosGolpesNinja(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
-    val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    nuevoAtacante.especie match{
-      case Humano => 
-        oponente.especie match {
-          case Androide => (nuevoAtacante.ki(-10),oponente)
-          case _ => golpeNinjaNormal(nuevoAtacante,oponente)
-          }
-      case _ =>  golpeNinjaNormal(nuevoAtacante,oponente)
-    }
-  }
-
-  def golpeNinjaNormal(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    if(atacante.ki > oponente.ki)
-          {
-            (atacante,oponente.ki(-20))
-          } else
-          {
-            (atacante.ki(-20),oponente)
-          }
-  }
-  
-  def explotar(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    //Console.println("EXPLOTEEEEE" + atacante.nombre)
-    val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    
-    val nuevoOponente : Guerrero = nuevoAtacante.especie match{
-      case Androide | Monstruo(_,_) => nuevoAtacante.especie match {
-          case Androide => oponente.ki(nuevoAtacante.ki * -3)
-          case _ => oponente.ki(nuevoAtacante.ki * -2)}
-       case _ => throw new InvalidAttackException("Solo pueden explotar los androides y monstruos")
+  case object muchosGolpesNinja extends Movimiento{
+    def apply(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
+      atacante.especie match{
+        case Humano => 
+          oponente.especie match {
+            case Androide => (atacante.ki(-10),oponente)
+            case _ => golpeNinjaNormal(atacante,oponente)
+            }
+        case _ =>  golpeNinjaNormal(atacante,oponente)
       }
-
-    val finalOpo:Guerrero = nuevoOponente.especie match {
-          case Namekusein => if (nuevoOponente.ki == 0) nuevoOponente.kiTo(1).estado(Normal) else nuevoOponente
-          case _ => nuevoOponente
-        }
-       (nuevoAtacante.kiTo(0).morite,finalOpo)
- }
-  
-  def ondaDeEnergia(kiRequerido :Int)(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    var atacanteNuevo = atacante
-    var oponenteNuevo = oponente
-    
-     if (atacante.ki >= kiRequerido){ 
-        atacanteNuevo = atacante.ki(-kiRequerido) 
-        
-        oponente.especie match {
-          case Monstruo(_,_) => oponenteNuevo =  oponente.ki(-kiRequerido/2) 
-          case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
-        }    
     }
-    val atacanteSinPotenciador = atacanteNuevo.perderPotenciador
-    (atacanteSinPotenciador, oponenteNuevo)
+  }
+
+  case object golpeNinjaNormal extends Movimiento{
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+      if(atacante.ki > oponente.ki)
+         (atacante,oponente.ki(-20))
+      else
+         (atacante.ki(-20),oponente)
+    }
+  }
+
+  case object explotar extends Movimiento{
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {      
+      val nuevoOponente : Guerrero = atacante.especie match{
+        case Androide | Monstruo(_,_) => atacante.especie match {
+            case Androide => oponente.ki(atacante.ki * -3)
+            case _ => oponente.ki(atacante.ki * -2)}
+         case _ => throw new InvalidAttackException("Solo pueden explotar los androides y monstruos")
+        }
+  
+      val finalOpo:Guerrero = nuevoOponente.especie match {
+            case Namekusein => if (nuevoOponente.ki == 0) nuevoOponente.kiTo(1).estado(Normal) else nuevoOponente
+            case _ => nuevoOponente
+          }
+         (atacante.kiTo(0).morite,finalOpo)
+   }
+  }
+
+  case class ondaDeEnergia(kiRequerido : Int) extends Movimiento{
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+      var atacanteNuevo = atacante
+      var oponenteNuevo = oponente
+      
+       if (atacante.ki >= kiRequerido){ 
+          atacanteNuevo = atacante.ki(-kiRequerido) 
+          
+          oponente.especie match {
+            case Monstruo(_,_) => oponenteNuevo =  oponente.ki(-kiRequerido/2) 
+            case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
+          }    
+      }
+      (atacanteNuevo, oponenteNuevo)
+    }
   }
   
-  def genkidama(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-    
-    var atacanteNuevo = atacante
-    var oponenteNuevo = oponente
-      
-    oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
-    val atacanteSinPotenciador = atacanteNuevo.perderPotenciador
-    (atacanteSinPotenciador, oponenteNuevo)
+  case object genkidama extends Movimiento{
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
+      var atacanteNuevo = atacante
+      var oponenteNuevo = oponente
+        
+      oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
+      (atacanteNuevo, oponenteNuevo)
+    }
   }
   
   case class Ataque(nombre :String, kiRequerido :Int)
@@ -177,19 +178,18 @@ object Movimientos {
   //              MAGIA
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  def magia(pase :Movimiento)(atacante :Guerrero, oponente :Guerrero): (Guerrero,Guerrero) = {
-    
-    val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    
-     atacante.especie match {      
-      case Namekusein | Monstruo(_,_) => pase(nuevoAtacante,oponente)
-      case _  => if (tieneEsferasDelDragon(nuevoAtacante)){  
-        
-                      pase(perderEsferasDelDragon(nuevoAtacante),oponente)
-                  }
-                  else {(nuevoAtacante, oponente)}
-    }
-  } 
+  case class magia(pase : (Guerrero, Guerrero)=>(Guerrero, Guerrero)) extends Movimiento{
+    def apply(atacante :Guerrero, oponente :Guerrero): (Guerrero,Guerrero) = {      
+       atacante.especie match {      
+        case Namekusein | Monstruo(_,_) => pase(atacante,oponente)
+        case _  => if (tieneEsferasDelDragon(atacante)){  
+          
+                        pase(perderEsferasDelDragon(atacante),oponente)
+                    }
+                    else {(atacante, oponente)}
+      }
+    } 
+  }
   
   def tieneEsferasDelDragon(guerrero: Guerrero) :Boolean = {
     guerrero.inventario.count(e => e.equals(EsferaDragon)).equals(7)
