@@ -134,8 +134,8 @@ package object dragonBall{
       }
       
     }
+    
     def revitalizate :Guerrero = {
-      
       estado match{
         case Inconsciente =>
           this.estado(Normal)
@@ -145,12 +145,9 @@ package object dragonBall{
     }
     
     def perdeSSJ :Guerrero = {
-      
       this.especie match{
-        case Saiyajin(cola, Some(_)) =>
-          val nivel = especie.asInstanceOf[Saiyajin].nivelSaiyajin
-          val kiInicial = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int] 
-      
+        case espSaiyajin@Saiyajin(cola, Some(_)) =>
+          val kiInicial = this.kiMaximo / Math.pow(5,espSaiyajin.nivelSaiyajin).asInstanceOf[Int] 
           this.kiMaximo(kiInicial).especie(Saiyajin(cola, None))
         case _ => this
       }
@@ -170,19 +167,23 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def soloAndroides(monstruo :Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
-    comida.especie match{
-      case Androide => var movimientosDeVictima = comida.habilidades
-                       var movimientosMonstruo = monstruo.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion
-                       var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
-                                                                .movimientos(movimientosMonstruo ++ movimientosDeVictima))
-                       (monstruoLleno, comida.morite)
-      case _ => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
+    monstruo.especie match {
+      case espMonstruo@Monstruo(_,_) =>
+        comida.especie match{
+          case esp@Androide => (monstruo.especie(espMonstruo.movimientos(espMonstruo.movimientosAprendidosPorDigestion ++ comida.habilidades)),comida.morite)
+          // TODO: EVALUAR CAMBIAR EL LANZAMIENTO DE LA EXCEPTION, PODRIA USAR UNA MONADA TRY
+          case _ => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
+        }
+      /* Si no es un monstruo no pasa nada */
+      case _ => (monstruo,comida)
     }
   }
   
-  def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
-    var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
-                                                  .movimientos(comida.habilidades))
+  def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {                                               
+    val monstruoLleno = monstruo.especie match {
+      case esp:Monstruo => monstruo.especie(esp.movimientos(comida.habilidades))
+      case _ => monstruo
+    }
     //Console.println("ME LO COMI")                                              
     (monstruoLleno, comida.morite)
   }
@@ -206,9 +207,9 @@ package object dragonBall{
                                     .especie( Saiyajin(cola, Some(SSJ(1) ) ))
           
           case Some(SSJ(nivel)) =>
-            // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
+            /* nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  ) */
             nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
-          //Agrego caso mono pero que no pase nada por ahora
+          /* Agrego caso mono pero que no pase nada por ahora */
           case Some(Mono(_)) => 
          }
         (nuevoGuerrero , oponente )
@@ -221,7 +222,10 @@ package object dragonBall{
   def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = saiyajin.ki >= (saiyajin.kiMaximo /2)
   
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
-  def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
+  def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie match {
+    case esp:Saiyajin => esp.nivelSaiyajin
+    case _ => 0
+  }
    
   
   
