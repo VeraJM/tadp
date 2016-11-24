@@ -164,9 +164,9 @@ package object dragonBall{
     def perdeSSJ :Guerrero = {
       
       this.especie match{
-        case Saiyajin(cola, Some(_)) =>
-          val nivel = especie.asInstanceOf[Saiyajin].nivelSaiyajin
-          val kiInicial = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int] 
+        case saiyajin @Saiyajin(cola, Some(_)) =>
+          val nivel = saiyajin.nivelSaiyajin
+          val kiInicial : Int = this.kiMaximo / Math.pow(5,nivel).asInstanceOf[Int]
       
           this.kiMaximo(kiInicial).especie(Saiyajin(cola, None))
         case _ => this
@@ -187,20 +187,22 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
   def soloAndroides(monstruo :Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
-    comida.especie match{
-      case Androide => var movimientosDeVictima = comida.habilidades
-                       var movimientosMonstruo = monstruo.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion
-                       var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
-                                                                .movimientos(movimientosMonstruo ++ movimientosDeVictima))
-                       (monstruoLleno, comida.morite)
-      case _ => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
+    
+    monstruo.especie match{
+      case especie @Monstruo(_,_) if comida.especie == Androide => var movimientosDeVictima = comida.habilidades
+                                                                   var movimientosMonstruo = especie.movimientosAprendidosPorDigestion
+                                                                   var monstruoLleno = monstruo.especie(especie.movimientos(movimientosMonstruo ++ movimientosDeVictima))
+                                                                   (monstruoLleno, comida.morite)
+      case especie @Monstruo(_,_) => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
     }
   }
   
   def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
-    var monstruoLleno = monstruo.especie(monstruo.especie.asInstanceOf[Monstruo]
-                                                  .movimientos(comida.habilidades))
-    //Console.println("ME LO COMI")                                              
+   val monstruoLleno = monstruo.especie match{
+      case especie @Monstruo(_,_) => monstruo.especie(especie.movimientos(comida.habilidades))
+      case _ => throw new RuntimeException("Solo los monstruos pueden comer")
+    }
+                                                
     (monstruoLleno, comida.morite)
   }
   
@@ -238,7 +240,8 @@ package object dragonBall{
   def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = saiyajin.ki >= (saiyajin.kiMaximo /2)
   
   //retorna el nivel del saiyajin, si esta en estado normal, es 0
-  def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie.asInstanceOf[Saiyajin].nivelSaiyajin
+  def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie match{case saiyajin @Saiyajin(_,_) => saiyajin.nivelSaiyajin
+                                                                        case _ => throw new RuntimeException("Solo los saiyajines tienen nivel")}
    
   
   
