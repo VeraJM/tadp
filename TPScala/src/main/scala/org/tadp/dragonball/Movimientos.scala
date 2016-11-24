@@ -102,6 +102,24 @@ object Movimientos {
     }
   }
   
+  case class fusion(companieroDeFusion : Guerrero) extends Movimiento{
+    def apply(atacante: Guerrero, oponente: Guerrero): (Guerrero, Guerrero) = {
+      atacante.especie match {
+        case Humano | Namekusein | Saiyajin(_,_) =>
+  
+          val fusionado = atacante.copy(
+                especie = Fusion(atacante),
+                habilidades = atacante.habilidades ++ companieroDeFusion.habilidades,
+                ki = atacante.ki + companieroDeFusion.ki,
+                kiMaximo = atacante.kiMaximo + companieroDeFusion.kiMaximo)
+  
+          (fusionado, oponente)
+  
+        case _ =>  (atacante, oponente)
+      }
+    }
+  }
+  
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              ATAQUES
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀

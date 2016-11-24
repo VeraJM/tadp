@@ -46,4 +46,6 @@ object Especies {
       this.copy(movimientosAprendidosPorDigestion = nuevosMovimientos)
     }
   }
+
+  case class Fusion(guerroBase: Guerrero) extends Especie
 }
