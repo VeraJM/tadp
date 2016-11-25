@@ -76,64 +76,64 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
     "Peleas entre guerreros" - {
 
       "Goku se deja fajar" in {
-        val (nuevoGoku, nuevoVegeta) = goku.hacerMovimiento(dejarseFajar, vegeta)
-        nuevoGoku.ki should be(900)
-        nuevoVegeta.ki should be(2000)
+        val combatientes = goku.hacerMovimiento(dejarseFajar, vegeta)
+        combatientes.get._1.ki should be(900)
+        combatientes.get._2.ki should be(2000)
       }
 
       "Goku sube su ki" in {
-        val (nuevoGoku, nuevoVegeta) = goku.hacerMovimiento(cargarKi, vegeta)
-        nuevoGoku.ki should be(1000)
+        val combatientes = goku.hacerMovimiento(cargarKi, vegeta)
+        combatientes.get._1.ki should be(1000)
       }
 
       "El androide no sube su ki cuando lo intenta" in {
-      evaluating {androide16.hacerMovimiento(cargarKi, cell)} should produce [RuntimeException]
+      evaluating {androide16.hacerMovimiento(cargarKi, cell).get} should produce [RuntimeException]
         
       }
 
       "Gohan lanza energia y su ki disminuye" in {
 
         val resultado = gohan.hacerMovimiento(masenko, goku)
-        resultado._1.ki shouldBe (1000)
+        resultado.get._1.ki shouldBe (1000)
       }
 
       "Vegeta le lanza energia a Goku y le saca el doble" in {
 
         val resultado = vegeta.hacerMovimiento(bigBang, goku)
-        resultado._2.ki shouldBe (300)
+        resultado.get._2.ki shouldBe (300)
       }
 
       "Goku le lanza energia a majin bu y solo le saca la mitad" in {
 
         val resultado = goku.hacerMovimiento(kamehameha, majinBuu)
-        resultado._2.ki shouldBe (1300)
+        resultado.get._2.ki shouldBe (1300)
       }
 
       "Goku le lanza una genkidama a Vegeta" in {
 
         //se deja fajar 2 veces, por lo que el daño tiene que ser 10^2
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
-        val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
-        val resultadoGenkidama = dejarse2._1.hacerMovimiento(genkidama, dejarse2._2)
+        val dejarse2 = dejarse1.get._1.hacerMovimiento(dejarseFajar, dejarse1.get._2)
+        val resultadoGenkidama = dejarse2.get._1.hacerMovimiento(genkidama, dejarse2.get._2)
 
-        resultadoGenkidama._2.ki shouldBe (vegeta.ki - 100)
+        resultadoGenkidama.get._2.ki shouldBe (vegeta.ki - 100)
       }
 
       "Goku carga genkidama y la reinicia al usar kamehameha" in {
 
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
-        val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
-        val despuesDeKamehameja = dejarse2._1.hacerMovimiento(kamehameha, dejarse2._2)
+        val dejarse2 = dejarse1.get._1.hacerMovimiento(dejarseFajar, dejarse1.get._2)
+        val despuesDeKamehameja = dejarse2.get._1.hacerMovimiento(kamehameha, dejarse2.get._2)
 
-        despuesDeKamehameja._1.potenciadorGenkidama shouldBe (0)
+        despuesDeKamehameja.get._1.potenciadorGenkidama shouldBe (0)
       }
 
       "Goku carga genkidama y la reinicia al quedar inconciente" in {
 
         val dejarse1 = goku.hacerMovimiento(dejarseFajar, vegeta)
-        val dejarse2 = dejarse1._1.hacerMovimiento(dejarseFajar, dejarse1._2)
+        val dejarse2 = dejarse1.get._1.hacerMovimiento(dejarseFajar, dejarse1.get._2)
         
-        val gokuInconsciente = dejarse2._1.poneteInconsciente
+        val gokuInconsciente = dejarse2.get._1.poneteInconsciente
 
         gokuInconsciente.potenciadorGenkidama shouldBe (0)
       }
@@ -142,35 +142,35 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
         val atacar = mrSatan.hacerMovimiento(muchosGolpesNinja, androide16)
 
-        atacar._1.ki shouldBe (70)
+        atacar.get._1.ki shouldBe (70)
       }
 
         "Goku hace muchos golpes ninja contra Cell y pierde 20 de ki por tener menos ki" in {
 
         val atacar = goku.hacerMovimiento(muchosGolpesNinja, cell)
 
-        atacar._1.ki shouldBe (880)
+        atacar.get._1.ki shouldBe (880)
       }
         
       "Vegeta hace muchos golpes ninja contra Cell y Cell pierde 20 de ki por tener menos ki" in {
 
         val atacar = vegeta.hacerMovimiento(muchosGolpesNinja, cell)
 
-        atacar._2.ki shouldBe (1480)
+        atacar.get._2.ki shouldBe (1480)
       }
       
       "Cell explota y muere" in {
 
         val atacar = cell.hacerMovimiento(explotar, vegeta)
 
-        atacar._1.estado shouldBe (Muerto)
+        atacar.get._1.estado shouldBe (Muerto)
       }
       
        "Cell explota y pierde todo su ki" in {
 
         val atacar = cell.hacerMovimiento(explotar, vegeta)
 
-        atacar._1.ki shouldBe (0)
+        atacar.get._1.ki shouldBe (0)
       }
        
       "Cell con 200 de ki explota y hace doble de ki por ser monstruo a vegeta" in {
@@ -178,7 +178,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         val cell2 = cell.kiTo(200)
         val atacar = cell2.hacerMovimiento(explotar, vegeta)
 
-        atacar._2.ki shouldBe (1600)
+        atacar.get._2.ki shouldBe (1600)
       }
       
      "Androide16 con 200 de ki explota y hace triple de ki por ser androide a vegeta" in {
@@ -186,20 +186,20 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         val androide16B = androide16.kiTo(200)
         val atacar = androide16B.hacerMovimiento(explotar, vegeta)
 
-        atacar._2.ki shouldBe (1400)
+        atacar.get._2.ki shouldBe (1400)
       }
      
      "Cell explota y daña a piccoro casi matandolo dejandolo en 1 de ki (por ser namekusein)" in {
 
         val atacar = cell.hacerMovimiento(explotar, piccolo)
 
-        atacar._2.ki shouldBe (1)
+        atacar.get._2.ki shouldBe (1)
       }
    
       "Piccoro intenta explotar y dispara un error" in {
 
         a[InvalidAttackException] should be thrownBy {
-        piccolo.hacerMovimiento(explotar, goku)
+        piccolo.hacerMovimiento(explotar, goku).get
         }
       }
       
@@ -207,7 +207,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         
         val resultado = majinBuu.hacerMovimiento(magia(curarse), goku)
         
-        resultado._1.ki shouldBe(2000)
+        resultado.get._1.ki shouldBe(2000)
         
       }
       
@@ -215,13 +215,13 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         
         val resultado = majinBuu.hacerMovimiento(magia(curaOponente), gohan)
         
-        resultado._2.ki shouldBe(2000)        
+        resultado.get._2.ki shouldBe(2000)        
       }
       
       "Mr Satan realiza un pase pero no pasa nada  por no tener las esferas del dragon" in{
         val resultado = mrSatan.hacerMovimiento(magia(curarse), majinBuu)
         
-        resultado._1.ki shouldBe(80) 
+        resultado.get._1.ki shouldBe(80) 
       }
       
       
@@ -229,14 +229,14 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       
         val resultado = krilin.hacerMovimiento(magia(curarse), majinBuu)
         
-        resultado._1.ki shouldBe(900) 
+        resultado.get._1.ki shouldBe(900) 
       }
        
        "Krilin pide un deseo y pierde las esferas del dragon" in{
       
         val resultado = krilin.hacerMovimiento(magia(curarse), majinBuu)
         
-        tieneEsferasDelDragon(resultado._1) shouldBe(false)
+        tieneEsferasDelDragon(resultado.get._1) shouldBe(false)
       }
        
        
@@ -301,29 +301,29 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
     "Al comer un guerrero este muere" in {
       val peleadores = cell.hacerMovimiento(comerOponente, androide15)
 
-      peleadores._2.estado should be(Muerto)
+      peleadores.get._2.estado should be(Muerto)
     }
 
     "Cell come androides y aprende sus poderes" in {
       val movimientosAprendidos: List[Movimiento] = movimientosAndroide15 ++ movimientosAndroide16
 
       var peleadores = cell.hacerMovimiento(comerOponente, androide15)
-      peleadores = peleadores._1.hacerMovimiento(comerOponente, androide16)
+      peleadores = peleadores.get._1.hacerMovimiento(comerOponente, androide16)
 
-      peleadores._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAprendidos)
+      peleadores.get._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAprendidos)
     }
 
-    "Cell no puede comer guerreros no androides" in {
+    "Cell no puede comer guerreros ni androides" in {
       a[RuntimeException] should be thrownBy {
-        cell.hacerMovimiento(comerOponente, goku)
+        cell.hacerMovimiento(comerOponente, goku).get
       }
     }
 
     "Majin Buu come todo tipo de guerreros y aprende los poderes solo del ultimo" in {
       var peleadores = majinBuu.hacerMovimiento(comerOponente, goku)
-      peleadores = peleadores._1.hacerMovimiento(comerOponente, androide15)
+      peleadores = peleadores.get._1.hacerMovimiento(comerOponente, androide15)
 
-      peleadores._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAndroide15)
+      peleadores.get._1.especie.asInstanceOf[Monstruo].movimientosAprendidosPorDigestion should be(movimientosAndroide15)
     }
   }
 
@@ -333,7 +333,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       //ki de goku = 900 < ki maximo/2 = 100 => no se transforma 
       val resultado = goku.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      nivelDelSaiyajin(resultado._1) shouldBe (0)
+      nivelDelSaiyajin(resultado.get._1) shouldBe (0)
     }
 
     "Goku se transforma en SSJ y no pierde su cola" in {
@@ -342,7 +342,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      resultado._1.especie.asInstanceOf[Saiyajin].cola shouldBe (gokuEnojado.especie.asInstanceOf[Saiyajin].cola)
+      resultado.get._1.especie.asInstanceOf[Saiyajin].cola shouldBe (gokuEnojado.especie.asInstanceOf[Saiyajin].cola)
     }
 
     "Goku se transforma en SSJ y multiplica su ki maximo por 5" in {
@@ -351,7 +351,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      resultado._1.kiMaximo shouldBe (10000)
+      resultado.get._1.kiMaximo shouldBe (10000)
     }
 
     "Goku normal se transforma en SSJ" in {
@@ -360,14 +360,14 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val resultado = gokuEnojado.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      nivelDelSaiyajin(resultado._1) shouldBe (1)
+      nivelDelSaiyajin(resultado.get._1) shouldBe (1)
     }
 
     "Goku se transforma en SSJ y no tiene efecto en el rival" in {
 
       val resultado = goku.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      resultado._2 should be(vegeta)
+      resultado.get._2 should be(vegeta)
     }
 
     "Goku SSJ1 se transforma en SSJ2" in {
@@ -375,7 +375,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val gokuSSJ = goku.especie(Saiyajin(false, Some(SSJ(1)))).kiMaximo(2000).ki(2000)
       val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      nivelDelSaiyajin(resultado._1) shouldBe (2)
+      nivelDelSaiyajin(resultado.get._1) shouldBe (2)
     }
 
     "Goku SSJ1 se transforma en SSJ2 y multiplica su nivel en 5 por el nivel" in {
@@ -384,7 +384,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val resultado = gokuSSJ.hacerMovimiento(convertirseEnSSJ, vegeta)
 
-      resultado._1.kiMaximo shouldBe (50000)
+      resultado.get._1.kiMaximo shouldBe (50000)
     }
 
     "Goku SSJ pierde su estado y recupera su ki maximo inicial" in {
@@ -415,7 +415,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val resultado = gokuSSJ.hacerMovimiento(convertirseEnMono, vegeta)
 
-      resultado._1.kiMaximo shouldBe (6000)
+      resultado.get._1.kiMaximo shouldBe (6000)
 
       }
     
@@ -433,7 +433,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val fusionarseConVegeta = fusion(vegeta)
 
-      val gogeta = goku.hacerMovimiento(fusionarseConVegeta, cell)._1
+      val gogeta = goku.hacerMovimiento(fusionarseConVegeta, cell).get._1
 
       gogeta.habilidades shouldBe (goku.habilidades ++ vegeta.habilidades)
       gogeta.ki shouldBe (goku.ki + vegeta.ki)
@@ -444,7 +444,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       val fusionarseConVegeta = fusion(vegeta)
 
-      val gogeta = goku.hacerMovimiento(fusionarseConVegeta, cell)._1
+      val gogeta = goku.hacerMovimiento(fusionarseConVegeta, cell).get._1
 
       val guerreroInconciente = gogeta.poneteInconsciente
 

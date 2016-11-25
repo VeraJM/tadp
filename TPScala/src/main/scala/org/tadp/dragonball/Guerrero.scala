@@ -86,8 +86,9 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     
     def pelearRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      val (nuevoAtacante,nuevoOponente) = this.hacerMovimiento(movimiento, oponente)
-      turnoOponente(nuevoAtacante,nuevoOponente)
+      //val (nuevoAtacante,nuevoOponente) = this.hacerMovimiento(movimiento, oponente)
+      val combatientes = this.hacerMovimiento(movimiento, oponente)
+      turnoOponente(combatientes.get._1,combatientes.get._2)
     }
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -179,9 +180,9 @@ package object dragonBall{
   //aca termina el guerrero
   
   def turnoOponente(atacante: Guerrero, oponente:Guerrero) = {
-    val (nuevoOponente,nuevoAtacante) = 
+    val combatientes = 
       oponente.hacerMovimiento(oponente.movimientoMasEfectivoContra(atacante, diferenciaDeKi), atacante)
-    (nuevoAtacante,nuevoOponente)
+    (combatientes.get._2,combatientes.get._1)
   }
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
