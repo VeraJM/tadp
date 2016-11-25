@@ -7,7 +7,7 @@ import org.tadp.dragonball.Movimientos.usarItem
 import org.tadp.dragonball.Movimientos.dejarseFajar
 import org.tadp.dragonball.Movimientos.genkidama
 import org.tadp.dragonball.Movimientos.Movimiento
-import scala.util.Try
+import scala.util._
 
 package object dragonBall{
   
@@ -46,6 +46,8 @@ package object dragonBall{
     
     def hacerMovimiento(movimiento : Movimiento, oponente : Guerrero) : Try[(Guerrero,Guerrero)] = {
       Try(
+          
+          //TODO: FALTA VERIFICAR QUE TENGA EL MOVIMIENTO EN SU LISTA
       estado match {
         // En caso de estar muerto no pasa nada
         // Aca es donde podria tirar error por estar muerto y querer hacer algo
@@ -59,8 +61,8 @@ package object dragonBall{
           case `dejarseFajar` => movimiento(this.aumentarPotenciador,oponente)
           case `genkidama` => movimiento(this,oponente) 
           case _ => movimiento(this.perderPotenciador, oponente)
+          }
         }
-      }
       )
     }
     
@@ -70,6 +72,7 @@ package object dragonBall{
     
     def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) = {    
       
+      /*
       val resultados = for {
         movimiento <- this.habilidades
         peleadores = hacerMovimiento(movimiento, oponente)
@@ -77,8 +80,15 @@ package object dragonBall{
           (atacante, oponente) = peleadores.get
           valor = criterio(atacante, oponente)    
       }yield(movimiento, valor)
-      
-      resultados.sortBy(_._2).reverse.head._1
+      */
+      val resultados2 = this.habilidades.map(mov =>(mov,this.hacerMovimiento(mov, oponente)))
+                          .filter(_._2.isSuccess)
+                          .map{case (move,peleadores) => (move,criterio(peleadores.get._1,peleadores.get._2))}
+                          //.filter(_._2 > 0)
+      //TODO: Cuando se filtran por el criterio sea positivo fallan los test
+                              
+                              
+      resultados2.sortBy(_._2).reverse.headOption.map(_._1)
     }
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -86,7 +96,6 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     
     def pelearRound(movimiento: Movimiento)(oponente: Guerrero) = {
-      //val (nuevoAtacante,nuevoOponente) = this.hacerMovimiento(movimiento, oponente)
       val combatientes = this.hacerMovimiento(movimiento, oponente)
       turnoOponente(combatientes.get._1,combatientes.get._2)
     }
@@ -95,24 +104,20 @@ package object dragonBall{
   //      PUNTO 3
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     
-    def planDeAtaqueContra(oponente :Guerrero, cantidadRounds : Int)(criterio :Criterio) :List[Movimiento] = {
-     
-     /*
-      * TODO: EL PLAN DE ATAQUE PUEDE NO ENCONTRAR UN MOVIMIENTO QUE LO SATISFAGA
-      * EN ESE CASO NO SE DEVUELVE NINGUN PLAN, HAY QUE CAMBIAR MEJOR MOVIMIENTO PARA QUE DEVUELVA
-      * UNA MONADA. PLAN DE ATAQUE TAMBIEN DEVUELVE UNA MONADA
-      * */ 
+    def planDeAtaqueContra(oponente :Guerrero, cantidadRounds : Int)(criterio :Criterio) : Option[List[Movimiento]] = {
+    
      val rounds = List.fill(cantidadRounds) {(atc:Guerrero,opo:Guerrero,plan:List[Movimiento]) => 
-                                               val movEfectivo = atc.movimientoMasEfectivoContra(opo, criterio)
-                                               val (nuevoAtc,nuevoOpo) = atc.pelearRound(movEfectivo)(opo)
+                                               val movEfectivo = atc.movimientoMasEfectivoContra(opo, criterio).get
+                                               val (nuevoAtc,nuevoOpo) = atc.pelearRound(movEfectivo)(opo).get
                                                (nuevoAtc,nuevoOpo,plan:+movEfectivo)
                                                }
-     
-     val (_,_,planAtaque) = rounds.foldLeft((this,oponente,List[Movimiento]() )) {
-        case ((atc,opt,plan),round) => round(atc,opt,plan)
-        }
-      
-      planAtaque
+     val plan = Try {
+       val (_,_,planAtaque) = rounds.foldLeft((this,oponente,List[Movimiento]() )) {
+          case ((atc,opt,plan),round) => round(atc,opt,plan)
+          }
+       planAtaque
+       }
+     plan.toOption
      }
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -120,13 +125,18 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     def pelearContra(oponente :Guerrero)(planDeAtaque : List[Movimiento]) : Pelea = {
   
-      val peleadores:Pelea = PeleaEnCurso(this,oponente)
-      val estado : Pelea = planDeAtaque.foldLeft(peleadores){
-          (peleadores:Pelea,mov:Movimiento) => peleadores.map {
-              (atc,opo) => atc.pelearRound(mov)(opo)
-              }
-          }
-      estado
+      try{
+        val peleadores:Pelea = PeleaEnCurso(this,oponente)
+        val estado : Pelea = planDeAtaque.foldLeft(peleadores){
+            (peleadores:Pelea,mov:Movimiento) => peleadores.map {
+                (atc,opo) => atc.pelearRound(mov)(opo).get
+                }
+            }
+        estado
+      } catch {
+        /* La lista de movimientos pasada tiene un movimiento no permitido para el atacante, la pelea se cancela */
+        case e:InvalidAttackException => PeleaCancelada(this,oponente,e)
+      }
     }
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -179,10 +189,10 @@ package object dragonBall{
 
   //aca termina el guerrero
   
-  def turnoOponente(atacante: Guerrero, oponente:Guerrero) = {
+  def turnoOponente(atacante: Guerrero, oponente:Guerrero):Try[(Guerrero,Guerrero)] = {
     val combatientes = 
-      oponente.hacerMovimiento(oponente.movimientoMasEfectivoContra(atacante, diferenciaDeKi), atacante)
-    (combatientes.get._2,combatientes.get._1)
+      oponente.hacerMovimiento(oponente.movimientoMasEfectivoContra(atacante, diferenciaDeKi).get, atacante)
+      combatientes.map {case (oponente,atacante) => (atacante,oponente)}
   }
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -197,7 +207,6 @@ package object dragonBall{
            case esp@Androide => (monstruo.especie(espMonstruo.movimientos(espMonstruo.movimientosAprendidosPorDigestion ++ comida.habilidades)),comida.morite)
            case _ => throw new InvalidAttackException("El monstruo no puede comer guerreros no androides")
          }
-      /* TODO: Si no es un monstruo no pasa nada. TAL VEZ DEBERIA TIRAR EXCEPCION */
        case _ => (monstruo,comida)
     }
   }
@@ -259,7 +268,7 @@ package object dragonBall{
   case object Muerto extends Estado
   case object Inconsciente extends Estado
   case object Normal extends Estado
-    type Criterio = (Guerrero,Guerrero) => Int
+  type Criterio = (Guerrero,Guerrero) => Int
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //          Transformaciones
@@ -275,15 +284,26 @@ package object dragonBall{
  
   sealed abstract class Pelea {
     def map(f : Movimiento): Pelea
-    def filter(p: (Guerrero,Guerrero) => Boolean): Option[Pelea]
+    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea
     def flatmap(f: (Guerrero,Guerrero) => Pelea): Pelea
     //TODO: resolver el fold para las PeleaTerminada
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T
   }
+  case class PeleaCancelada(atc:Guerrero,opo:Guerrero,motivo:Exception) extends Pelea {
+    def map(f: Movimiento):Pelea = this
+    def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = this
+    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = this
+    //TODO: Fijarse si el fold podria usar una monada como retorno
+    //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
+    
+    def get : Guerrero = atc
+  }
   
   case class PeleaEnCurso(atc:Guerrero,opo:Guerrero) extends Pelea {
     def map(f: Movimiento):Pelea = {
+      
       val (nuevoAtc,nuevoOpo) = f(atc,opo)
+      
       val estados = (nuevoAtc.estado,nuevoOpo.estado)
       estados match{
         case (_,Muerto) => PeleaTerminada(nuevoAtc)
@@ -294,8 +314,8 @@ package object dragonBall{
     
     def get : (Guerrero,Guerrero) = (this.atc,this.opo)
     
-    def filter(p: (Guerrero,Guerrero) => Boolean): Option[Pelea] = {
-      if (p(this.atc,this.opo)) Some(this) else None
+    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = {
+      if (p(this.atc,this.opo)) this else PeleaCancelada(this.atc,this.opo,InvalidAttackException("ads"))
     }
     
     def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = f(this.atc,this.opo)
@@ -307,7 +327,7 @@ package object dragonBall{
   case class PeleaTerminada(ganador:Guerrero) extends Pelea {
     def map(f: Movimiento):Pelea = this
     def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = this
-    def filter(p: (Guerrero,Guerrero) => Boolean): Option[Pelea] = None
+    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = this
     //TODO: Fijarse si el fold podria usar una monada como retorno
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
     
