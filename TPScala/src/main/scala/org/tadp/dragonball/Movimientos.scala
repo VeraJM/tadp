@@ -20,7 +20,7 @@ object Movimientos {
     def apply(atacante: Guerrero, oponente: Guerrero) : (Guerrero, Guerrero) = {
      
       atacante.especie match{
-        case Androide => (atacante,oponente)
+        case Androide => throw new RuntimeException("Los androides no cargan ki")
         case Saiyajin (_,transformacion) => transformacion match {
           case Some(SSJ(nivel)) => (atacante.ki(150*nivel),oponente)
           case _ => (atacante.ki(100),oponente)
@@ -52,7 +52,7 @@ object Movimientos {
                     }
               case _ => (atacante,oponenteAtacado)
           }
-          case ArmaDeFuego(municion) => 
+          case ArmaDeFuego(municion) if municion > 0 => 
             val armaUsada = ArmaDeFuego(municion - 1)
             val atacanteNuevo = atacante.item(item, armaUsada)
             

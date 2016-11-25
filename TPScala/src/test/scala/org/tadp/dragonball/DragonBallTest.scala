@@ -19,6 +19,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
   val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
   val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
+  val movimientosAndroideCargadorKi: List[Movimiento] = List(dejarseFajar, movCargarki)
   val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio),explotar)
   val movimientosMonstruo: List[Movimiento] = List(comerOponente,explotar)
   val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
@@ -49,6 +50,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val gohan = Guerrero("Gohan", Saiyajin(cola = false), movimientosGoku, ki = 1200,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGohan, Normal)
   val androide15 = Guerrero("Androide 15", Androide, movimientosAndroide15, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
   val androide16 = Guerrero("Androide 16", Androide, movimientosAndroide16, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
+  val androideCargadorKi = Guerrero("Androide cargador de ki", Androide, movimientosAndroideCargadorKi, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
   val cell = Guerrero("Cell", Monstruo(soloAndroides, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val majinBuu = Guerrero("Majin Buu", Monstruo(comerTodo, List()), movimientosMonstruo, ki = 1500,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = List(), Normal)
   val mrSatan = Guerrero("Satan", Humano, movimientosHumano, ki = 80,potenciadorGenkidama = 0, kiMaximo = 250, inventario = List(), Normal)
@@ -85,8 +87,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       }
 
       "El androide no sube su ki cuando lo intenta" in {
-        val resultado = androide16.hacerMovimiento(cargarKi, cell)
-        resultado._1.ki shouldBe (androide16.ki)
+      evaluating {androide16.hacerMovimiento(cargarKi, cell)} should produce [RuntimeException]
+        
       }
 
       "Gohan lanza energia y su ki disminuye" in {
@@ -245,6 +247,11 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       "Mejor movimiento de danio" in {
         val mejor = goku.movimientoMasEfectivoContra(vegeta, mayorDanioAlEnemigo)
         mejor should be(movUsarArmaFilosa)
+      }
+      
+      "Mejor movimiento de androide que sabe cargar ki no rompe" in {
+        val mejor = androideCargadorKi.movimientoMasEfectivoContra(vegeta, mayorKi)
+        mejor should be (movDejarseFajar)
       }
 
       "Mejor movimiento de ki de atacante" in {
