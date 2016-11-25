@@ -7,6 +7,7 @@ import org.tadp.dragonball.Movimientos.usarItem
 import org.tadp.dragonball.Movimientos.dejarseFajar
 import org.tadp.dragonball.Movimientos.genkidama
 import org.tadp.dragonball.Movimientos.Movimiento
+import scala.util.Try
 
 package object dragonBall{
   
@@ -43,8 +44,9 @@ package object dragonBall{
     
     def esDeEspecie(especie : Especie) = {this.especie == especie}
     
-    def hacerMovimiento(movimiento : Movimiento, oponente : Guerrero) : (Guerrero,Guerrero) = {
-     val peleadores = estado match {
+    def hacerMovimiento(movimiento : Movimiento, oponente : Guerrero) : Try[(Guerrero,Guerrero)] = {
+      Try(
+      estado match {
         // En caso de estar muerto no pasa nada
         // Aca es donde podria tirar error por estar muerto y querer hacer algo
         case Muerto => (this,oponente)
@@ -59,28 +61,22 @@ package object dragonBall{
           case _ => movimiento(this.perderPotenciador, oponente)
         }
       }
-      peleadores
+      )
     }
-     //movimiento match{
-       //case `dejarseFajar` => (peleadores._1.aumentarPotenciador, peleadores._2)
-      // case _ => (peleadores._1.perderPotenciador, peleadores._2)
-     //}
-    //}
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //      PUNTO 1
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     
-    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) = {
+    def movimientoMasEfectivoContra(oponente: Guerrero, criterio: Criterio) = {    
       
-      /*
-       * TODO: PODRIA NO HABER MOVIMIENTO QUE SATISFAGA EL CRITERIO, HAY QUE DEVOLVERLO USANDO UNA MONADA
-       * */
       val resultados = for {
         movimiento <- this.habilidades
-        (nuevoAtacante,nuevoOponente) = hacerMovimiento(movimiento, oponente)
-        valor = criterio(nuevoAtacante, nuevoOponente)
-      }yield (movimiento,valor)
+        peleadores = hacerMovimiento(movimiento, oponente)
+        if peleadores.isSuccess 
+          (atacante, oponente) = peleadores.get
+          valor = criterio(atacante, oponente)    
+      }yield(movimiento, valor)
       
       resultados.sortBy(_._2).reverse.head._1
     }
