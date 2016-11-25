@@ -186,7 +186,7 @@ object Movimientos {
       var oponenteNuevo = oponente
         
       oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
-      (atacanteNuevo, oponenteNuevo)
+      (atacanteNuevo.perderPotenciador, oponenteNuevo)
     }
   }
   

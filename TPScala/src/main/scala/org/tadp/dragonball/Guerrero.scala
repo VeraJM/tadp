@@ -5,6 +5,7 @@ import org.tadp.dragonball.Especies._
 import org.tadp.dragonball.Items._
 import org.tadp.dragonball.Movimientos.usarItem
 import org.tadp.dragonball.Movimientos.dejarseFajar
+import org.tadp.dragonball.Movimientos.genkidama
 import org.tadp.dragonball.Movimientos.Movimiento
 
 package object dragonBall{
@@ -52,14 +53,19 @@ package object dragonBall{
           case usarItem(SemillaDeErmitanio) => movimiento(this.perderPotenciador, oponente)
           case _ => (this, oponente)
         }
-        case _ => movimiento(this,oponente)
+        case _ => movimiento match { 
+          case `dejarseFajar` => movimiento(this.aumentarPotenciador,oponente)
+          case `genkidama` => movimiento(this,oponente) 
+          case _ => movimiento(this.perderPotenciador, oponente)
+        }
       }
-          
-     movimiento match{
-       case `dejarseFajar` => (peleadores._1.aumentarPotenciador, peleadores._2)
-       case _ => (peleadores._1.perderPotenciador, peleadores._2)
-     }
+      peleadores
     }
+     //movimiento match{
+       //case `dejarseFajar` => (peleadores._1.aumentarPotenciador, peleadores._2)
+      // case _ => (peleadores._1.perderPotenciador, peleadores._2)
+     //}
+    //}
     
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //      PUNTO 1
