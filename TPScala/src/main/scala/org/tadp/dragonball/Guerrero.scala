@@ -188,19 +188,21 @@ package object dragonBall{
   
   def soloAndroides(monstruo :Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
     
-    monstruo.especie match{
-      case especie @Monstruo(_,_) if comida.especie == Androide => var movimientosDeVictima = comida.habilidades
-                                                                   var movimientosMonstruo = especie.movimientosAprendidosPorDigestion
-                                                                   var monstruoLleno = monstruo.especie(especie.movimientos(movimientosMonstruo ++ movimientosDeVictima))
-                                                                   (monstruoLleno, comida.morite)
-      case especie @Monstruo(_,_) => throw new RuntimeException("El monstruo no puede comer guerreros no androides")
+    monstruo.especie match {
+       case espMonstruo@Monstruo(_,_) =>
+         comida.especie match{
+           case esp@Androide => (monstruo.especie(espMonstruo.movimientos(espMonstruo.movimientosAprendidosPorDigestion ++ comida.habilidades)),comida.morite)
+           case _ => throw new InvalidAttackException("El monstruo no puede comer guerreros no androides")
+         }
+      /* TODO: Si no es un monstruo no pasa nada. TAL VEZ DEBERIA TIRAR EXCEPCION */
+       case _ => (monstruo,comida)
     }
   }
   
   def comerTodo(monstruo : Guerrero, comida : Guerrero) : (Guerrero, Guerrero) = {
    val monstruoLleno = monstruo.especie match{
       case especie @Monstruo(_,_) => monstruo.especie(especie.movimientos(comida.habilidades))
-      case _ => throw new RuntimeException("Solo los monstruos pueden comer")
+      case _ => throw new InvalidAttackException("Solo los monstruos pueden comer")
     }
                                                 
     (monstruoLleno, comida.morite)
@@ -213,27 +215,28 @@ package object dragonBall{
   def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
    
     val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    var nuevoGuerrero : Guerrero = nuevoAtacante    
+    val nuevoGuerrero : Guerrero =    
     nuevoAtacante.especie match{
          
       case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(nuevoAtacante)  =>
         
         transformacion match {
           //si no tenia, se transforma en nivel 1
-          case None => 
-            nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5)
+          case None => nuevoAtacante.multiplicarKiMaximoEn(5)
                                     .especie( Saiyajin(cola, Some(SSJ(1) ) ))
           
           case Some(SSJ(nivel)) =>
             // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
-            nuevoGuerrero = nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
+            nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
           //Agrego caso mono pero que no pase nada por ahora
-          case Some(Mono(_)) => 
+          case Some(Mono(_)) => nuevoAtacante
          }
-        (nuevoGuerrero , oponente )
         
-     case _ => (nuevoAtacante, oponente)
-    }  
+     //TODO: TAL VEZ DEBERIA DAR EXCEPTION SI NO ES SAIYAJIN   
+     case _ => nuevoAtacante
+    }
+    
+    (nuevoGuerrero,oponente)
   } 
 
   //retorna si el guerrero(saiyajin) puede avanzar un nivel se SSJ
