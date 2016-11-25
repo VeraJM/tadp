@@ -34,10 +34,12 @@ object Especies {
 
   case object Namekusein extends Especie;
   
+  //TODO: pueden hacer un type alias de la tupla de guerreros de la siguiente manera:
+  //---> type Combatientes = (Guerrero ,Guerrero)
   case class Monstruo(formaDigestion: (Guerrero ,Guerrero) => (Guerrero, Guerrero), 
                       movimientosAprendidosPorDigestion : List[Movimiento]) extends Especie{
     def comer(atacante : Guerrero, oponente : Guerrero) : (Guerrero, Guerrero) = {
-      var guerreros = this.formaDigestion(atacante, oponente);
+      val guerreros = this.formaDigestion(atacante, oponente)
       
       (guerreros._1, guerreros._2.kiTo(0).estado(Muerto))
     }
