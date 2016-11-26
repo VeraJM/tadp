@@ -3,6 +3,7 @@ package org.tadp.dragonball
 import org.tadp.dragonball.dragonBall._
 import org.tadp.dragonball.Especies._
 import org.tadp.dragonball.Items._
+import scala.util._
 
 object Movimientos {
 
