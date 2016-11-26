@@ -87,8 +87,10 @@ package object dragonBall {
     }
 
     def pelearRoundError(movimiento: Movimiento)(oponente: Guerrero): Try[Combatientes] = {
-      val (atcnuevo, oponuevo) = this.hacerMovimiento(movimiento, oponente).get
-      turnoOponente(atcnuevo, oponuevo)
+      Try{
+        val (atcnuevo, oponuevo) = this.hacerMovimiento(movimiento, oponente).get
+        turnoOponente(atcnuevo, oponuevo).get
+      }
     }
 
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
