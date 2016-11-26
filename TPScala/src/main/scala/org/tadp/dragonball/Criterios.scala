@@ -1,23 +1,20 @@
 package org.tadp.dragonball
 
 import org.tadp.dragonball.dragonBall._
+import org.tadp.dragonball.Movimientos._
+import org.tadp.dragonball.Especies._
 
-object Criterios {
+package object Criterios {
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //      Criterios de movimientos
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   
-  def mayorDanioAlEnemigo(atacante: Guerrero, oponente: Guerrero) : Int = {
-    oponente.kiMaximo - oponente.ki
-  }
+ type Criterio = Combatientes => Int
   
-  def mayorKi(atacante: Guerrero, oponente: Guerrero) : Int = {
-    atacante.ki
-  }
+  def mayorDanioAlEnemigo(combate : Combatientes) : Int = combate._2.kiMaximo - combate._2.ki
   
-  def diferenciaDeKi(atacante: Guerrero, oponente: Guerrero) : Int = {
-    atacante.ki - oponente.ki
-  }
+  def mayorKi(combate : Combatientes): Int = combate._1.ki
   
+  def diferenciaKi(combate : Combatientes) : Int = combate._1.ki - combate._2.ki
 }

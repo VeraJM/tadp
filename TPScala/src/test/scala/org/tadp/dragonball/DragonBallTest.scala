@@ -17,7 +17,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movCargarki = cargarKi 
   val movDejarseFajar = dejarseFajar
 
-  val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
+  val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa,usarItem(SemillaDeErmitanio))
+  val movimientosVegeta: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
   val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
   val movimientosAndroideCargadorKi: List[Movimiento] = List(dejarseFajar, movCargarki)
   val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio),explotar)
@@ -29,8 +30,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val bigBang = ondaDeEnergia(300) 
   val masenko = ondaDeEnergia(200) 
     
-  val curarse :Movimiento = (atacante,oponente) => (atacante.recuperaKiMaximo, oponente)
-  val curaOponente :Movimiento = (atacante,oponente) => (atacante, oponente.recuperaKiMaximo)
+  val curarse :Movimiento = {case (atacante,oponente) => (atacante.recuperaKiMaximo, oponente)}
+  val curaOponente :Movimiento = {case (atacante,oponente) => (atacante, oponente.recuperaKiMaximo)}
   
   // Otra opcion es: 
   /* val curarse = magia((atacante,oponente) => (atacante.recuperaKiMaximo, oponente)) _
@@ -46,7 +47,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   
   //GUERREROS
   val goku = Guerrero("Goku", Saiyajin(), movimientosGoku, ki = 900, kiMaximo = 2000, inventario = itemsGoku, estado = Normal)
-  val vegeta = Guerrero("Vegeta", Saiyajin(), movimientosGoku, ki = 2000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
+  val vegeta = Guerrero("Vegeta", Saiyajin(), movimientosVegeta, ki = 2000,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGoku, Normal)
   val gohan = Guerrero("Gohan", Saiyajin(cola = false), movimientosGoku, ki = 1200,potenciadorGenkidama = 0, kiMaximo = 2000, inventario = itemsGohan, Normal)
   val androide15 = Guerrero("Androide 15", Androide, movimientosAndroide15, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
   val androide16 = Guerrero("Androide 16", Androide, movimientosAndroide16, ki = 100,potenciadorGenkidama = 0, kiMaximo = 200, inventario = List(), Normal)
@@ -62,7 +63,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   //      ASSERT PARA LAS MONADAS DEL PUNTO 4
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   def assertOnTerminada(resultado:Pelea,ganador:Guerrero) = resultado match{
-    case pelea:PeleaTerminada => pelea.get.shouldBe(ganador)
+    case pelea:PeleaTerminada => pelea.getGanador.shouldBe(ganador)
     case _ => fail
   }
   
@@ -197,7 +198,9 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       }
    
       "Piccolo intenta explotar y dispara un error" in {
-        piccolo.hacerMovimiento(explotar, goku).isFailure shouldBe(true)
+        val fail = piccolo.hacerMovimiento(explotar, goku)
+        fail.isFailure shouldBe(true)
+        Console.println(fail)
         
       }
       
@@ -254,11 +257,11 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
 
       "Mejor movimiento de ki de atacante" in {
         val mejor = goku.movimientoMasEfectivoContra(vegeta, mayorKi).get
-        mejor should be(movCargarki)
+        mejor should be(usarItem(SemillaDeErmitanio))
       }
 
       "Mejor movimiento de diferencia de ki" in {
-        val mejor = goku.movimientoMasEfectivoContra(vegeta, diferenciaDeKi).get
+        val mejor = goku.movimientoMasEfectivoContra(vegeta, diferenciaKi).get
         mejor should be(movUsarArmaFilosa)
       }
 
@@ -267,7 +270,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
     "Pelear Round" - {
 
       "Un round de cargar ki atacante saiyajin con cola" in {
-        val (nuevoGoku, nuevoVegeta) = goku.pelearRound(movCargarki)(vegeta).get
+        val (nuevoGoku,nuevoVegeta) = goku.pelearRound(movCargarki)(vegeta).get
         /* Vegeta tiene un arma filosa, es muy efectiva contra los saiyajins con cola(los deja en 1 de ki) */
         /* Goku tiene cola */
         nuevoGoku.ki should be(1)
@@ -287,8 +290,8 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
         goku.ki should be(900)
         gohan.ki should be(1200)
         val (nuevoGoku, nuevoGohan) = goku.pelearRound(movUsarArmaFilosa)(gohan).get
-        nuevoGoku.ki should be(1)
-        nuevoGohan.ki should be(300)
+        nuevoGoku.ki should be(900)
+        nuevoGohan.ki should be(2000)
       }
 
     }
@@ -454,7 +457,7 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
     
     "Plan de ataque Goku vs Vegeta" in {
       
-      val planDeGoku = goku.planDeAtaqueContra(vegeta, 3)(diferenciaDeKi)
+      val planDeGoku = goku.planDeAtaqueContra(vegeta, 3)(diferenciaKi)
 //      planDeGoku.foreach { x => Console.println(x) }
 //      Console.println(planDeGoku.length)
       /* Goku planea primero atacar, recuperarse por la represalia y volver a atacar */
@@ -477,10 +480,10 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       val estadoFinal: Pelea = goku.pelearContra(vegeta)(planDeAtaque)
       
       val gokuFinal = Guerrero("Goku",Saiyajin(false,None),movimientosGoku,100,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
-      val vegetaFinal = Guerrero("Vegeta",Saiyajin(false,None),movimientosGoku,101,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
+      val vegetaFinal = Guerrero("Vegeta",Saiyajin(false,None),movimientosVegeta,101,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
 
       assertOnEnCurso(estadoFinal,gokuFinal,vegetaFinal)
-      
+
     }
     
     
@@ -489,10 +492,11 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       /* Gohan no tiene cola, los ataques de Arma Filosa no son tan efectivos, goku pierde el combate */
       val planDeAtaque = List(movUsarArmaFilosa,movCargarki,movUsarArmaFilosa)
       val estadoFinal: Pelea = goku.pelearContra(gohan)(planDeAtaque)
-      
-      val gohanFinal = Guerrero("Gohan",Saiyajin(false,None),movimientosGoku,300,0,2000,List(SemillaDeErmitanio),Normal)
-      assertOnTerminada(estadoFinal,gohanFinal)
-      
+     
+      val gohanFinal = Guerrero("Gohan",Saiyajin(false,None),movimientosGoku,2000,0,2000,List(SemillaDeErmitanio),Normal)
+      val gokuFinal = Guerrero("Goku",Saiyajin(false,None),movimientosGoku,1,0,2000,List(SemillaDeErmitanio, ArmaFilosa),Normal)
+          
+      assertOnEnCurso(estadoFinal,gokuFinal,gohanFinal)
       
     }
     

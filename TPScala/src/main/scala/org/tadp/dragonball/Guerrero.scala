@@ -1,12 +1,10 @@
 package org.tadp.dragonball
 
 import org.tadp.dragonball.Criterios._
+import org.tadp.dragonball.Criterios.diferenciaKi
 import org.tadp.dragonball.Especies._
 import org.tadp.dragonball.Items._
-import org.tadp.dragonball.Movimientos.usarItem
-import org.tadp.dragonball.Movimientos.dejarseFajar
-import org.tadp.dragonball.Movimientos.genkidama
-import org.tadp.dragonball.Movimientos.Movimiento
+import org.tadp.dragonball.Movimientos._
 import scala.util._
 
 package object dragonBall {
@@ -14,6 +12,8 @@ package object dragonBall {
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //               Guerrero
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+  type Combatientes = (Guerrero, Guerrero)
 
   case class Guerrero(nombre: String,
                       especie: Especie,
@@ -30,36 +30,34 @@ package object dragonBall {
       val nuevoGuerrero = copy(ki = nuevoki)
       if (nuevoki == 0) nuevoGuerrero.morite else nuevoGuerrero
     }
-    def kiTo(value: Int): Guerrero = copy(ki=value)
+    def kiTo(value: Int): Guerrero = copy(ki = value)
     def estado(nuevoEstado: Estado): Guerrero = copy(estado = nuevoEstado)
     def kiMaximo(nuevoMaximo: Int): Guerrero = copy(kiMaximo = nuevoMaximo)
     def especie(especie: Especie): Guerrero = copy(especie = especie)
     def aumentarPotenciador: Guerrero = copy(potenciadorGenkidama = potenciadorGenkidama + 1)
     def perderPotenciador: Guerrero = copy(potenciadorGenkidama = 0)
     def inventario(nuevaLista: List[Item]): Guerrero = copy(inventario = nuevaLista)
-
     def multiplicarKiMaximoEn(valor: Int): Guerrero = kiMaximo(kiMaximo * valor)
-
     // Crear la lista de inventario con un item modificado, ej: la arma de fuego con una bala menos
     def item(itemViejo: Item, itemNuevo: Item): Guerrero = copy(inventario = inventario.updated(inventario.indexOf(itemViejo), itemNuevo))
-
     def esDeEspecie(especie: Especie) = { this.especie == especie }
 
-    def hacerMovimiento(movimiento: Movimiento, oponente: Guerrero): Try[(Guerrero, Guerrero)] = {
+    def hacerMovimiento(movimiento: Movimiento, oponente: Guerrero): Try[Combatientes] = {
       Try(
 
         //TODO: FALTA VERIFICAR QUE TENGA EL MOVIMIENTO EN SU LISTA
+
         estado match {
           // En caso de estar muerto no pasa nada
           // Aca es donde podria tirar error por estar muerto y querer hacer algo
           case Muerto => throw new RuntimeException("un guerrero muerto no puede atacar")
           // Hay movimientos que se puede hacer por mas que esten inconcientes. Ej: comer semillas
           case Inconsciente => movimiento match {
-            case usarItem(SemillaDeErmitanio) => movimiento(this.perderPotenciador, oponente)
+            case usarItem(SemillaDeErmitanio) => movimiento((this.perderPotenciador, oponente))
             case _                            => (this, oponente)
           }
           case _ => movimiento match {
-            case `dejarseFajar` => movimiento(this.aumentarPotenciador, oponente)
+            case `dejarseFajar` => movimiento((this.aumentarPotenciador, oponente))
             case `genkidama`    => movimiento(this, oponente)
             case _              => movimiento(this.perderPotenciador, oponente)
           }
@@ -87,10 +85,15 @@ package object dragonBall {
     //      PUNTO 2
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-    def pelearRound(movimiento: Movimiento)(oponente: Guerrero) = {
+    def pelearRound(movimiento: Movimiento)(oponente: Guerrero): Pelea = {
       //TODO: que pasaria si hacerMovimiento falla en algun momento(?)...
-      val combatientes = this.hacerMovimiento(movimiento, oponente)
-      turnoOponente(combatientes.get._1, combatientes.get._2)
+      val combate = PeleaEnCurso(this, oponente).map {
+        case (atc, opo) => {
+          val (atcnuevo, oponuevo) = atc.hacerMovimiento(movimiento, opo).get
+          turnoOponente(atcnuevo, oponuevo)
+        }
+      }
+      combate
     }
 
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -99,16 +102,17 @@ package object dragonBall {
 
     def planDeAtaqueContra(oponente: Guerrero, cantidadRounds: Int)(criterio: Criterio): Option[List[Movimiento]] = {
 
-      val rounds = List.fill(cantidadRounds) { 
-        (atc: Guerrero, opo: Guerrero, plan: List[Movimiento]) =>
-        val movEfectivo = atc.movimientoMasEfectivoContra(opo, criterio).get
-        val (nuevoAtc, nuevoOpo) = atc.pelearRound(movEfectivo)(opo).get
-        (nuevoAtc, nuevoOpo, plan :+ movEfectivo)
+      val rounds = List.fill(cantidadRounds) {
+        (pelea: Pelea, plan: List[Movimiento]) =>
+          val (atc,opo) = pelea.get
+          val movEfectivo = atc.movimientoMasEfectivoContra(opo, criterio).get
+          val peleaNueva = atc.pelearRound(movEfectivo)(opo)
+          (peleaNueva, plan :+ movEfectivo)
       }
-      
+
       val plan = Try {
-        val (_, _, planAtaque) = rounds.foldLeft((this, oponente, List[Movimiento]())) {
-          case ((atc, opt, plan), round) => round(atc, opt, plan)
+        val (_, planAtaque) = rounds.foldLeft(PeleaEnCurso((this, oponente)):Pelea, List[Movimiento]()) {
+          case ((pelea, plan), round) => round(pelea, plan)
         }
         planAtaque
       }
@@ -120,19 +124,14 @@ package object dragonBall {
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
     def pelearContra(oponente: Guerrero)(planDeAtaque: List[Movimiento]): Pelea = {
       //La idea es que usen las mónadas de resultado de pelea en vez de usar un try catch de excepciones. 
-      try {
-        val peleadores: Pelea = PeleaEnCurso(this, oponente)
-        val estado: Pelea = planDeAtaque.foldLeft(peleadores) {
-          (peleadores: Pelea, mov: Movimiento) =>
-            peleadores.map {
-              (atc, opo) => atc.pelearRound(mov)(opo).get
-            }
-        }
-        estado
-      } catch {
-        /* La lista de movimientos pasada tiene un movimiento no permitido para el atacante, la pelea se cancela */
-        case e: InvalidAttackException => PeleaCancelada(this, oponente, e)
+      val peleadores: Pelea = PeleaEnCurso(this, oponente)
+      val estado: Pelea = planDeAtaque.foldLeft(peleadores) {
+        (peleadores: Pelea, mov: Movimiento) =>
+          peleadores.flatmap {
+            case (atc, opo) => atc.pelearRound(mov)(opo)
+          }
       }
+      estado
     }
 
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -145,13 +144,11 @@ package object dragonBall {
         case fusion @ Fusion(_) => fusion.guerroBase
         case _                  => this
       }
-      
       nuevoGuerrero.perderPotenciador.estado(Muerto).kiTo(0)
     }
 
     def poneteInconsciente: Guerrero = {
       val nuevoGuerrero: Guerrero = this.perderPotenciador
-
       this.especie match {
         case Saiyajin(_, _)     => nuevoGuerrero.perdeSSJ.estado(Inconsciente)
         case fusion @ Fusion(_) => fusion.guerroBase.estado(Inconsciente)
@@ -159,13 +156,12 @@ package object dragonBall {
       }
 
     }
-    def revitalizate: Guerrero = {
 
+    def revitalizate: Guerrero = {
       estado match {
         case Inconsciente =>
           this.estado(Normal)
         case _ => this
-
       }
     }
 
@@ -183,10 +179,10 @@ package object dragonBall {
   }
   //----aca termina el guerrero----
 
-  def turnoOponente(atacante: Guerrero, oponente: Guerrero): Try[(Guerrero, Guerrero)] = {
-    val combatientes =
-      oponente.hacerMovimiento(oponente.movimientoMasEfectivoContra(atacante, diferenciaDeKi).get, atacante)
-    combatientes.map { case (oponente, atacante) => (atacante, oponente) }
+  def turnoOponente(combate: Combatientes): Combatientes = {
+    val (opo, atc) =
+      combate._2.hacerMovimiento(combate._2.movimientoMasEfectivoContra(combate._1, diferenciaKi).get, combate._1).get
+    (atc, opo)
   }
 
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -194,7 +190,7 @@ package object dragonBall {
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
   def soloAndroides(monstruo: Guerrero, comida: Guerrero): (Guerrero, Guerrero) = {
-     
+
     monstruo.especie match {
       case espMonstruo @ Monstruo(_, _) =>
         comida.especie match {
@@ -210,7 +206,6 @@ package object dragonBall {
       case especie @ Monstruo(_, _) => monstruo.especie(especie.movimientos(comida.habilidades))
       case _                        => throw new InvalidAttackException("Solo los monstruos pueden comer")
     }
-
     (monstruoLleno, comida.morite)
   }
 
@@ -218,9 +213,9 @@ package object dragonBall {
   //  MOVIMIENTOS DEL SAIYAJIN
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-  def convertirseEnSSJ(atacante: Guerrero, oponente: Guerrero): (Guerrero, Guerrero) = {
-    // si el movimiento no es dejarse fajar, ya se pierde el potenciador.
-    val nuevoGuerrero: Guerrero =
+  def convertirseEnSSJ(combate: Combatientes): Combatientes = {
+    val (atacante,oponente) = combate
+    val nuevoGuerrero =
       atacante.especie match {
 
         case Saiyajin(cola, transformacion) if puedeConvertirseEnSJJ(atacante) =>
@@ -256,12 +251,10 @@ package object dragonBall {
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //            Estados
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-
   sealed trait Estado
   case object Muerto extends Estado
   case object Inconsciente extends Estado
   case object Normal extends Estado
-  type Criterio = (Guerrero, Guerrero) => Int
 
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //          Transformaciones
@@ -277,56 +270,56 @@ package object dragonBall {
 
   sealed abstract class Pelea {
     def map(f: Movimiento): Pelea
-    def filter(p: (Guerrero, Guerrero) => Boolean): Pelea
-    def flatmap(f: (Guerrero, Guerrero) => Pelea): Pelea
+    def filter(p: Combatientes => Boolean): Pelea
+    def flatmap(f: Combatientes => Pelea): Pelea
+    def get : Combatientes
     //TODO: resolver el fold para las PeleaTerminada
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T
   }
-  case class PeleaCancelada(atc: Guerrero, opo: Guerrero, motivo: Exception) extends Pelea {
+  case class PeleaCancelada(combate: Combatientes, motivo: Exception) extends Pelea {
     def map(f: Movimiento): Pelea = this
-    def flatmap(f: (Guerrero, Guerrero) => Pelea): Pelea = this
-    def filter(p: (Guerrero, Guerrero) => Boolean): Pelea = this
+    def flatmap(f: Combatientes => Pelea): Pelea = this
+    def filter(p: Combatientes => Boolean): Pelea = this
     //TODO: Fijarse si el fold podria usar una monada como retorno
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
 
-    def get: Guerrero = atc
+    def get: Combatientes = combate
   }
 
-  case class PeleaEnCurso(atc: Guerrero, opo: Guerrero) extends Pelea {
+  case class PeleaEnCurso(combate: Combatientes) extends Pelea {
     def map(f: Movimiento): Pelea = {
-
-      val (nuevoAtc, nuevoOpo) = f(atc, opo)
-
-      val estados = (nuevoAtc.estado, nuevoOpo.estado)
-      estados match {
-        case (_, Muerto) => PeleaTerminada(nuevoAtc)
-        case (Muerto, _) => PeleaTerminada(nuevoOpo)
-        case (_, _)      => PeleaEnCurso(nuevoAtc, nuevoOpo)
+      try {
+        val (nuevoAtc, nuevoOpo) = f(combate)
+        val estados = (nuevoAtc.estado, nuevoOpo.estado)
+        estados match {
+          case (_, Muerto) => PeleaTerminada(nuevoAtc)
+          case (Muerto, _) => PeleaTerminada(nuevoOpo)
+          case (_, _)      => PeleaEnCurso(nuevoAtc, nuevoOpo)
+        }
+      } catch {
+        case e: InvalidAttackException => PeleaCancelada(combate, e)
       }
     }
 
-    def get: (Guerrero, Guerrero) = (this.atc, this.opo)
-
-    def filter(p: (Guerrero, Guerrero) => Boolean): Pelea = {
-      if (p(this.atc, this.opo)) this else PeleaCancelada(this.atc, this.opo, InvalidAttackException("ads...."))
+    def get: Combatientes = combate
+    def filter(p: Combatientes => Boolean): Pelea = {
+      if (p(combate)) this else PeleaCancelada(combate, InvalidAttackException("Pelea Invalida"))
     }
-
-    def flatmap(f: (Guerrero, Guerrero) => Pelea): Pelea = f(this.atc, this.opo)
-
-    def fold[T](e: ((Guerrero, Guerrero) => T))(f: ((Guerrero, Guerrero) => T)): T = e(this.atc, this.opo)
-
+    def flatmap(f: Combatientes => Pelea): Pelea = f(combate)
+    def fold[T](e: (Combatientes => T))(f: (Combatientes => T)): T = e(combate)
   }
 
   case class PeleaTerminada(ganador: Guerrero) extends Pelea {
     def map(f: Movimiento): Pelea = this
-    def flatmap(f: (Guerrero, Guerrero) => Pelea): Pelea = this
-    def filter(p: (Guerrero, Guerrero) => Boolean): Pelea = this
+    def flatmap(f: Combatientes => Pelea): Pelea = this
+    def filter(p: Combatientes => Boolean): Pelea = this
     //TODO: Fijarse si el fold podria usar una monada como retorno
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
-
-    def get: Guerrero = ganador
+    def get: Combatientes = throw new PeleaTerminadaException("La Pelea ya esta terminada")
+    def getGanador: Guerrero = ganador
   }
 
   case class InvalidAttackException(s: String) extends Exception(s)
+  case class PeleaTerminadaException(s: String) extends Exception(s)
 
 }
