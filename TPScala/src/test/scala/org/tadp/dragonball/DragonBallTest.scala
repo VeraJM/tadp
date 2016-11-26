@@ -200,7 +200,6 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
       "Piccolo intenta explotar y dispara un error" in {
         val fail = piccolo.hacerMovimiento(explotar, goku)
         fail.isFailure shouldBe(true)
-        Console.println(fail)
         
       }
       

@@ -13,7 +13,7 @@ package object dragonBall {
   //               Guerrero
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-  type Combatientes = (Guerrero, Guerrero) with Serializable
+  type Combatientes = (Guerrero, Guerrero)
 
   case class Guerrero(nombre: String,
                       especie: Especie,
@@ -71,7 +71,7 @@ package object dragonBall {
       val resultados = for {
         movimiento <- this.habilidades
         (atacante, oponente) <- hacerMovimiento(movimiento, oponente).toOption
-        valor = criterio(atacante, oponente)
+        valor = criterio((atacante, oponente))
       } yield (movimiento, valor)
       //.filter(_._2 > 0)
 
@@ -82,8 +82,8 @@ package object dragonBall {
     //      PUNTO 2
     //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-    def pelearRound(movimiento: Movimiento)(oponente: Guerrero): Combatientes = {
-      this.pelearRoundError(movimiento)(oponente).getOrElse(this,oponente)
+    def pelearRound(movimiento: Movimiento)(oponente: Guerrero): Pelea = {
+      PeleaEnCurso((this,oponente)).map (movimiento)
     }
 
     def pelearRoundError(movimiento: Movimiento)(oponente: Guerrero): Try[Combatientes] = {
@@ -99,10 +99,9 @@ package object dragonBall {
 
       val rounds = List.fill(cantidadRounds) {
         (pelea: Pelea, plan: List[Movimiento]) =>
-          pelea.map { 
           val (atc, opo) = pelea.get
           val movEfectivo = atc.movimientoMasEfectivoContra(opo, criterio).get
-          val peleaNueva = atc.pelearRoundImpl(movEfectivo)(opo)
+          val peleaNueva = pelea.map {movEfectivo}
           (peleaNueva, plan :+ movEfectivo)
       }
 
@@ -122,9 +121,7 @@ package object dragonBall {
       val peleadores: Pelea = PeleaEnCurso(this, oponente)
       val estado: Pelea = planDeAtaque.foldLeft(peleadores) {
         (peleadores: Pelea, mov: Movimiento) =>
-          peleadores.flatmap {
-            case (atc, opo) => atc.pelearRound(mov)(opo)
-          }
+          peleadores.map { mov }
       }
       estado
     }
@@ -263,7 +260,7 @@ package object dragonBall {
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
   sealed abstract class Pelea {
-    def map(f: Combatientes => Try[Combatientes]): Pelea
+    def map(f: Movimiento): Pelea
     def filter(p: Combatientes => Boolean): Pelea
     def flatmap(f: Combatientes => Pelea): Pelea
     def get: Combatientes
@@ -271,7 +268,7 @@ package object dragonBall {
     //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T
   }
   case class PeleaCancelada(combate: Combatientes, motivo: Exception) extends Pelea {
-    def map(f: Combatientes => Try[Combatientes]): Pelea = this
+    def map(f: Movimiento): Pelea = this
     def flatmap(f: Combatientes => Pelea): Pelea = this
     def filter(p: Combatientes => Boolean): Pelea = this
     //TODO: Fijarse si el fold podria usar una monada como retorno
@@ -281,13 +278,12 @@ package object dragonBall {
   }
 
   case class PeleaEnCurso(combate: Combatientes) extends Pelea {
-    def map(f: Combatientes => Try[Combatientes]): Pelea = {
-        f(combate).map { 
-          ( comb =>
-            (comb._1.estado,comb._2.estado) match {
+    def map(f: Movimiento): Pelea = {
+      combate._1.pelearRoundError(f)(combate._2).map { 
+          ( comb => (comb._1.estado,comb._2.estado) match {
             case (_, Muerto) => PeleaTerminada(comb._1)
             case (Muerto, _) => PeleaTerminada(comb._2)
-            case _      => PeleaEnCurso(comb._1, comb._2)
+            case _           => PeleaEnCurso(comb._1, comb._2)
             }
         )}.getOrElse (PeleaCancelada(combate,InvalidAttackException("Ataque invalido")))
     }
@@ -301,7 +297,7 @@ package object dragonBall {
   }
 
   case class PeleaTerminada(ganador: Guerrero) extends Pelea {
-    def map(f: Combatientes => Try[Combatientes]): Pelea = this
+    def map(f: Movimiento): Pelea = this
     def flatmap(f: Combatientes => Pelea): Pelea = this
     def filter(p: Combatientes => Boolean): Pelea = this
     //TODO: Fijarse si el fold podria usar una monada como retorno
