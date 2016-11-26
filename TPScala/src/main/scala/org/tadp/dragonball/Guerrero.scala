@@ -223,33 +223,6 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //  MOVIMIENTOS DEL SAIYAJIN
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-  
-  def convertirseEnSSJ(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
-   
-    val nuevoAtacante : Guerrero = atacante.perderPotenciador
-    val nuevoGuerrero : Guerrero =    
-    nuevoAtacante.especie match{
-         
-      case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(nuevoAtacante)  =>
-        
-        transformacion match {
-          //si no tenia, se transforma en nivel 1
-          case None => nuevoAtacante.multiplicarKiMaximoEn(5)
-                                    .especie( Saiyajin(cola, Some(SSJ(1) ) ))
-          
-          case Some(SSJ(nivel)) =>
-            // nuevoGuerrero = atacante.multiplicarKiMaximoEn( (nivel +1)*5  )
-            nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
-          //Agrego caso mono pero que no pase nada por ahora
-          case Some(Mono(_)) => nuevoAtacante
-         }
-        
-     //TODO: TAL VEZ DEBERIA DAR EXCEPTION SI NO ES SAIYAJIN   
-     case _ => nuevoAtacante
-    }
-    
-    (nuevoGuerrero,oponente)
-  } 
 
   //retorna si el guerrero(saiyajin) puede avanzar un nivel se SSJ
   def puedeConvertirseEnSJJ(saiyajin :Guerrero): Boolean = saiyajin.ki >= (saiyajin.kiMaximo /2)
@@ -258,7 +231,6 @@ package object dragonBall{
   def nivelDelSaiyajin(saiyajin :Guerrero):Int = saiyajin.especie match{case saiyajin @Saiyajin(_,_) => saiyajin.nivelSaiyajin
                                                                         case _ => throw new RuntimeException("Solo los saiyajines tienen nivel")}
    
-  
   
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //            Estados

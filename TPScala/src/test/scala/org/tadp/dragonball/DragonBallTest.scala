@@ -16,14 +16,6 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
   val movUsarArmaFilosa = usarItem(ArmaFilosa)
   val movCargarki = cargarKi 
   val movDejarseFajar = dejarseFajar
-
-  val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
-  val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
-  val movimientosAndroideCargadorKi: List[Movimiento] = List(dejarseFajar, movCargarki)
-  val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio),explotar)
-  val movimientosMonstruo: List[Movimiento] = List(comerOponente,explotar)
-  val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
-  val movimientosNamekusein: List[Movimiento] = List(muchosGolpesNinja)
   
   val kamehameha = ondaDeEnergia(400) 
   val bigBang = ondaDeEnergia(300) 
@@ -38,7 +30,16 @@ class DragonBallTest extends FreeSpec with Matchers with BeforeAndAfter {
    * 
    * y utilizar asi: atacante.hacerMovimiento(curarese, oponente)
    * */
-    
+
+  val movimientosGoku: List[Movimiento] = List(movDejarseFajar, movCargarki, movUsarArmaFilosa)
+  val movimientosAndroide15: List[Movimiento] = List(dejarseFajar)
+  val movimientosAndroideCargadorKi: List[Movimiento] = List(dejarseFajar, movCargarki)
+  val movimientosAndroide16: List[Movimiento] = List(usarItem(SemillaDeErmitanio),explotar)
+  val movimientosMonstruo: List[Movimiento] = List(comerOponente,explotar)
+  val movimientosHumano: List[Movimiento] = List(muchosGolpesNinja)
+  val movimientosNamekusein: List[Movimiento] = List(muchosGolpesNinja)
+  
+ 
   //LISTA DE ITEMS
   val itemsGoku: List[Item] = List(SemillaDeErmitanio, ArmaFilosa)
   val itemsGohan: List[Item] = List(SemillaDeErmitanio)

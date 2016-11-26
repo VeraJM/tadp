@@ -120,6 +120,34 @@ object Movimientos {
     }
   }
   
+  case object convertirseEnSSJ extends Movimiento{ 
+    def apply(atacante :Guerrero, oponente :Guerrero): (Guerrero, Guerrero)={
+   
+      val nuevoAtacante : Guerrero = atacante.perderPotenciador
+      val nuevoGuerrero : Guerrero =    
+      nuevoAtacante.especie match{
+         
+      case Saiyajin(cola,transformacion) if puedeConvertirseEnSJJ(nuevoAtacante)  =>
+          
+        transformacion match {
+          //si no tenia, se transforma en nivel 1
+          case None => nuevoAtacante.multiplicarKiMaximoEn(5)
+                                    .especie( Saiyajin(cola, Some(SSJ(1) ) ))
+          
+          case Some(SSJ(nivel)) =>
+            nuevoAtacante.multiplicarKiMaximoEn(5).especie( Saiyajin(cola,Some(SSJ(nivel+1))))
+          //Agrego caso mono pero que no pase nada por ahora
+          case Some(Mono(_)) => atacante
+         }
+        
+       //TODO: TAL VEZ DEBERIA DAR EXCEPTION SI NO ES SAIYAJIN   
+       case _ => atacante
+      }
+    
+    (nuevoGuerrero,oponente)
+    } 
+  }
+  
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //              ATAQUES
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
