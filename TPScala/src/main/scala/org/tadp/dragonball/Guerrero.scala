@@ -103,7 +103,10 @@ package object dragonBall{
        val (_,_,planAtaque) = rounds.foldLeft((this,oponente,List[Movimiento]() )) {
           case ((atc,opt,plan),round) => round(atc,opt,plan)
           }
-       planAtaque
+       if(planAtaque.size == cantidadRounds)
+         planAtaque
+       else
+        throw new RuntimeException("Cantidad insuficiente de movimientos")
        }
      plan.toOption
      }
@@ -127,6 +130,34 @@ package object dragonBall{
       }
     }
   
+        
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  //      Torneo (tp individual)
+  //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+    
+    def pelearTorneo(unCriterio : Criterio)(retadores : List[Guerrero], rounds : Int) : ResultadoDePelea = {
+      
+      val estadoInicial : ResultadoDePelea = EsperandoCompetidor(this)
+      retadores.foldLeft(estadoInicial){
+        (resultadoAnterior : ResultadoDePelea, oponente : Guerrero) =>
+          resultadoAnterior match{
+            case PeleaPerdida(_,_)=> resultadoAnterior
+            case PeleaCancelada(peleador, oponente, e) => PeleaPerdida(peleador, oponente)
+            case PeleaEnCurso(peleador,oponente) => PeleaPerdida(peleador, oponente)
+            case PeleaGanada(peleador, _) => peleador.pelearRondaTorneo(oponente, rounds, unCriterio)
+            case EsperandoCompetidor(peleador) => peleador.pelearRondaTorneo(oponente, rounds, unCriterio)
+          }
+      }
+    }
+    
+    def pelearRondaTorneo(retador : Guerrero, cantidadRounds : Int, criterioMovimientos : Criterio) = {
+      val movimientos = this.planDeAtaqueContra(retador, cantidadRounds)(criterioMovimientos)
+      movimientos match{
+        case Some(movimientos) => this.pelearContra(retador)(movimientos)
+        case _ => PeleaCancelada(this, retador, new RuntimeException("Peleador sin movimientos")) 
+      }
+    }
+    
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //     CAMBIOS DE ESTADO
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀    
@@ -241,66 +272,7 @@ package object dragonBall{
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
   //        RESULTADOS DE PELEA
   //▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
- 
-  /*sealed abstract class Pelea {
-    def map(f : Movimiento): Pelea
-    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea
-    def flatmap(f: (Guerrero,Guerrero) => Pelea): Pelea
-    //TODO: resolver el fold para las PeleaTerminada
-    //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T
-  }
-  case class PeleaCancelada(atc:Guerrero,opo:Guerrero,motivo:Exception) extends Pelea {
-    def map(f: Movimiento):Pelea = this
-    def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = this
-    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = this
-    //TODO: Fijarse si el fold podria usar una monada como retorno
-    //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
-    
-    def get : Guerrero = atc
-  }
-  
-  case class PeleaEnCurso(atc:Guerrero,opo:Guerrero) extends Pelea {
-    def map(f: Movimiento):Pelea = {
-      
-      val (nuevoAtc,nuevoOpo) = f(atc,opo)
-      
-      val estados = (nuevoAtc.estado,nuevoOpo.estado)
-      estados match{
-        case (_,Muerto) => PeleaTerminada(nuevoAtc)
-        case (Muerto,_) => PeleaTerminada(nuevoOpo)
-        case (_,_) => PeleaEnCurso(nuevoAtc,nuevoOpo)
-      }  
-    }
-    
-    def get : (Guerrero,Guerrero) = (this.atc,this.opo)
-    
-    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = {
-      if (p(this.atc,this.opo)) this else PeleaCancelada(this.atc,this.opo,InvalidAttackException("ads"))
-    }
-    
-    def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = f(this.atc,this.opo)
-    
-    def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = e(this.atc,this.opo)
-    
-  }
-  
-  case class PeleaPerdida(atc:Guerrero, opo:Guerrero) extends Pelea{
-    
-  }
-  
-  
-  /*case class PeleaTerminada(ganador:Guerrero) extends Pelea {
-    def map(f: Movimiento):Pelea = this
-    def flatmap(f: (Guerrero,Guerrero) => Pelea ):Pelea = this
-    def filter(p: (Guerrero,Guerrero) => Boolean): Pelea = this
-    //TODO: Fijarse si el fold podria usar una monada como retorno
-    //def fold[T](e : ((Guerrero,Guerrero) => T)) (f:((Guerrero,Guerrero)=>T)): T = None
-    
-    def get : Guerrero = ganador
-  }*/
-  
-  
-  */
+
   type  Peleadores = (Guerrero, Guerrero)
   
   trait ResultadoDePelea {
@@ -356,6 +328,16 @@ package object dragonBall{
     def flatMap(f: (Peleadores => ResultadoDePelea)) = this
     
     def fold[T](e: (Peleadores => T))(f: (Peleadores => T)) = e(atacante, oponente)
+  }
+  
+  case class EsperandoCompetidor(val peleador : Guerrero) extends ResultadoDePelea{
+        def map(f: Movimiento) = this
+    
+    def filter(f: (Peleadores => Boolean)) = this
+    
+    def flatMap(f: (Peleadores => ResultadoDePelea)) = this
+    
+    def fold[T](e: (Peleadores => T))(f: (Peleadores => T)) = ???
   }
   
   case class InvalidAttackException(s:String) extends Exception(s)
