@@ -37,7 +37,7 @@ object Especies {
   case class Monstruo(formaDigestion: (Guerrero ,Guerrero) => (Guerrero, Guerrero), 
                       movimientosAprendidosPorDigestion : List[Movimiento]) extends Especie{
     def comer(atacante : Guerrero, oponente : Guerrero) : (Guerrero, Guerrero) = {
-      var guerreros = this.formaDigestion(atacante, oponente);
+      val guerreros = this.formaDigestion(atacante, oponente);
       
       (guerreros._1, guerreros._2.kiTo(0).estado(Muerto))
     }

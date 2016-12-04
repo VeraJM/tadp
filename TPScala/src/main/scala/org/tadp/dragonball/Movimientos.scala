@@ -192,29 +192,30 @@ object Movimientos {
   }
 
   case class ondaDeEnergia(kiRequerido : Int) extends Movimiento{
-    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-      var atacanteNuevo = atacante
-      var oponenteNuevo = oponente
-      
-       if (atacante.ki >= kiRequerido){ 
-          atacanteNuevo = atacante.ki(-kiRequerido) 
-          
-          oponente.especie match {
-            case Monstruo(_,_) => oponenteNuevo =  oponente.ki(-kiRequerido/2) 
-            case _ => oponenteNuevo =  oponente.ki(- 2*kiRequerido)
-          }    
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {      
+     if (atacante.ki >= kiRequerido){ 
+          val atacanteNuevo = atacante.ki(-kiRequerido) 
+          val oponenteNuevo : Guerrero = dañoOndaEnergia(oponente,kiRequerido)
+          (atacanteNuevo, oponenteNuevo)
       }
-      (atacanteNuevo, oponenteNuevo)
+     else{ (atacante, oponente)}
+    }
+  }
+  
+  case object dañoOndaEnergia {  
+    def apply(unGuerrero : Guerrero, kiRequerido : Int) : Guerrero = {
+    unGuerrero.especie match {
+      case Monstruo(_,_) => unGuerrero.ki(-kiRequerido/2)
+      case _ => unGuerrero.ki(-2*kiRequerido)
+    }
     }
   }
   
   case object genkidama extends Movimiento{
-    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {
-      var atacanteNuevo = atacante
-      var oponenteNuevo = oponente
-        
-      oponenteNuevo = oponenteNuevo.ki(-Math.pow(10, atacanteNuevo.potenciadorGenkidama).toInt)
-      (atacanteNuevo.perderPotenciador, oponenteNuevo)
+    def apply(atacante:Guerrero,oponente:Guerrero) : (Guerrero,Guerrero) = {    
+      val oponenteNuevo = oponente.ki(-Math.pow(10, atacante.potenciadorGenkidama).toInt)
+      val atacanteNuevo = atacante.perderPotenciador
+      (atacanteNuevo, oponenteNuevo)
     }
   }
   
